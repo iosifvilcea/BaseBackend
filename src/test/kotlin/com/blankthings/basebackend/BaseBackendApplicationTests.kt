@@ -1,0 +1,13 @@
+package com.blankthings.basebackend
+
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class BaseBackendApplicationTests {
+
+    @Test
+    fun contextLoads() {
+    }
+
+}
