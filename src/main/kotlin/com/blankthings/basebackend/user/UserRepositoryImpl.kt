@@ -5,13 +5,13 @@ import kotlin.random.Random
 
 @Repository
 class UserRepositoryImpl: UserRepository {
-    private val users = mutableListOf<User>()
+    private val users = mutableMapOf<String, User>()
 
     override fun createUser(email: String): User {
         val createdUser = User(id = Random.nextLong(), email = email)
-        users.add(createdUser)
+        users[createdUser.email] = createdUser
         return createdUser
     }
 
-    override fun getUsers(): List<User> = users
+    override fun getUsers(): List<User> = users.values.toList()
 }
