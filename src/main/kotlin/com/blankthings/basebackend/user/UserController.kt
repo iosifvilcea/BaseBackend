@@ -15,6 +15,9 @@ class UserController(private val userRepository: UserRepository) {
     @PostMapping("/users")
     fun create(@RequestParam email: String) = userRepository.createUser(email)
 
+    @GetMapping("/users/{email}")
+    fun getUser(@RequestParam email: String) = userRepository.getUser(email)
+
     @GetMapping("/users")
     fun getAll() = userRepository.getUsers()
 
@@ -23,8 +26,4 @@ class UserController(private val userRepository: UserRepository) {
 //
 //    @GetMapping("/users/update")
 //    fun updateUser(@RequestParam email: String) = userRepository.updateUser(email)
-//
-//    @GetMapping("/users/{email}")
-//    fun getUser(@RequestParam email: String) = userRepository.getUser(email)
-//
 }
