@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 class UserController(private val userRepository: UserRepository) {
 
-    @PostMapping("/users")
+    @PostMapping
     fun create(@RequestParam email: String) = userRepository.createUser(email)
 
-    @GetMapping("/users/{email}")
+    @GetMapping("{email}")
     fun getUser(@RequestParam email: String) = userRepository.getUser(email)
 
-    @GetMapping("/users")
+    @GetMapping
     fun getAll() = userRepository.getUsers()
 
 //    @GetMapping("/users/delete")

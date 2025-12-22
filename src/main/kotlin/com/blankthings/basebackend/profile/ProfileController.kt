@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/profile")
 class ProfileController(val profileRepository: ProfileRepository) {
 
-    @PostMapping("/profile")
+    @PostMapping
     fun setEmail(@RequestParam email: String) = profileRepository.setEmail(email)
 
-    @PostMapping("/profile")
+    @PostMapping
     fun setUsername(@RequestParam username: String) = profileRepository.setUsername(username)
 
-    @GetMapping("/profile")
+    @GetMapping("/profile/{id}")
     fun getProfile(@RequestParam id: Long) = profileRepository.getProfile(id)
 
 }
