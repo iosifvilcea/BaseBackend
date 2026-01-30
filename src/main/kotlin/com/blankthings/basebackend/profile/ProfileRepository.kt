@@ -1,7 +1,7 @@
 package com.blankthings.basebackend.profile
 
-interface ProfileRepository {
-    fun setUsername(username: String)
-    fun setEmail(email: String)
-    fun getProfile(id: Long): Profile
+import org.springframework.data.jpa.repository.JpaRepository
+
+interface ProfileRepository: JpaRepository<Profile, Long> {
+    fun findByEmail(email: String): Profile?
 }
