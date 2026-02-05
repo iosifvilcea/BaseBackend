@@ -11,10 +11,9 @@ import jakarta.persistence.Table
 @Table(name = "profiles")
 data class Profile(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-//    @Column(nullable = false, unique = true)
-//    val username: String,
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long,
+
     @Column(nullable = false, unique = true)
     val email: String
 )

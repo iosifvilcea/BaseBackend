@@ -1,9 +1,8 @@
 package com.blankthings.basebackend.user
 
-interface UserRepository {
-    fun createUser(email: String): User
-//    fun updateUser(email: String): User
-//    fun deleteUser(email: String): Boolean
-    fun getUser(email: String): User
-    fun getUsers(): List<User>
+import com.blankthings.basebackend.profile.Profile
+import org.springframework.data.jpa.repository.JpaRepository
+
+interface UserRepository: JpaRepository<User, Long> {
+    fun findByEmail(email: String): User?
 }

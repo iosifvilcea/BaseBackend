@@ -10,20 +10,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/users")
-class UserController(private val userRepository: UserRepository) {
+class UserController(private val userService: UserService) {
 
     @PostMapping
-    fun create(@RequestParam email: String) = userRepository.createUser(email)
+    fun login(@RequestParam email: String) = userService.login(email)
 
-    @GetMapping("{email}")
-    fun getUser(@RequestParam email: String) = userRepository.getUser(email)
-
-    @GetMapping
-    fun getAll() = userRepository.getUsers()
-
-//    @GetMapping("/users/delete")
-//    fun deleteUser(@RequestParam email: String) = userRepository.deleteUser(email)
+//    @PostMapping
+//    fun create(@RequestParam email: String) = userService.createUser(email)
 //
-//    @GetMapping("/users/update")
-//    fun updateUser(@RequestParam email: String) = userRepository.updateUser(email)
+//    @GetMapping("{email}")
+//    fun getUser(@RequestParam email: String) = userService.getUser(email)
+
+//    @GetMapping
+//    fun getAll() = ...
 }
