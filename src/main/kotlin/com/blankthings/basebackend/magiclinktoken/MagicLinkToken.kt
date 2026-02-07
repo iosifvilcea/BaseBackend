@@ -3,14 +3,15 @@ package com.blankthings.basebackend.magiclinktoken
 import com.blankthings.basebackend.user.User
 import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "magic_link_tokens")
 data class MagicLinkToken(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long,
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mlt_seq")
+    @SequenceGenerator(name = "mlt_seq", sequenceName = "mlt_id_seq", allocationSize = 1)
+    val id: Long? = null,
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -20,10 +21,22 @@ data class MagicLinkToken(
     val tokenHash: String,
 
     @NotNull
-    val expiresAt: LocalDate,
+    val expiresAt: LocalDateTime,
 
     @NotNull
-    val createdAt: LocalDate,
+    val createdAt: LocalDateTime,
 
-    val used: Boolean = false
-)
+    var used: Boolean = false
+) {
+    fun markAsUsed() {
+        this.used = true
+    }
+
+    fun isExpired(): Boolean {
+        return LocalDateTime.now().isAfter(expiresAt)
+    }
+
+    fun isValid(): Boolean {
+        return !used && !isExpired()
+    }
+}

@@ -1,29 +1,37 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.analytics.AnalyticsEvent
+import com.blankthings.basebackend.analytics.AnalyticsTracker
+import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class UserService(private val userRepository: UserRepository) {
+class UserService(
+    private val analytics: Logger = LoggerFactory.getLogger(UserService::class.java),
+    private val tokenService: MagicLinkTokenService,
+    private val userRepository: UserRepository
+) {
     fun login(email: String) {
-        val result = userRepository.findByEmail(email)?.let {
-            processUser(it)
-        } ?: createNewUser(email)
+        val user = userRepository.findByEmail(email) ?: createNewUser(email)
+        analytics.info("login($email) .. user:" + user.email + " , " + user.id + " , " + user.magicLinkToken)
+        processLogin(user)
     }
 
-    private fun processUser(user: User): Status {
-        return Status.USER_LOGIN_SUCCESS
+    private fun processLogin(user: User) {
+        val token = tokenService.generateToken(user)
+        analytics.info("ProcessLogin(): Token: $token")
+        // TODO - Generate EMAIL
+        // TODO - SEND EMAIL
+        // TODO - UPDATE UI THAT EMAIL HAS BEEN SENT
     }
 
-    private fun createNewUser(email: String): Status {
-        return Status.USER_CREATE_SUCCESS
-    }
-}
+    private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
-enum class Status {
-    USER_LOGIN_SUCCESS,
-    USER_LOGIN_FAILURE,
-    USER_CREATE_SUCCESS,
-    USER_CREATE_FAILURE
+    fun authenticate(token: String) {
+        tokenService.validate(token)
+    }
 }
