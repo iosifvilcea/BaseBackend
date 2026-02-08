@@ -2,9 +2,7 @@ package com.blankthings.basebackend.user
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -17,8 +15,8 @@ class UserController(private val userService: UserService) {
 
     @PostMapping
     @ResponseBody
-    fun login(@RequestBody loginDao: LoginDao): ResponseEntity<LoginResponse> {
-        userService.login(loginDao.email)
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
+        userService.login(loginRequest.email)
         return ResponseEntity.ok(LoginResponse())
     }
 
@@ -27,6 +25,13 @@ class UserController(private val userService: UserService) {
 
 }
 
-data class LoginDao(val email: String)
+data class LoginRequest(val email: String)
 
-data class LoginResponse(val successMessage: String = "Your login link has been sent!")
+data class LoginResponse(
+    val successMessage: String =
+        """
+            Your login link has been sent!
+            Please check your email to login.
+            If you can't find the login link in your email, be sure to check your spam folder.
+        """.trimIndent()
+)
