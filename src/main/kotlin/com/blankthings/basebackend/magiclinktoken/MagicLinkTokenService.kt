@@ -1,6 +1,9 @@
 package com.blankthings.basebackend.magiclinktoken
 
 import com.blankthings.basebackend.user.User
+import com.blankthings.basebackend.user.UserService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,7 +14,10 @@ import java.util.Base64
 
 @Service
 @Transactional
-class MagicLinkTokenService(private val magicLinkTokenRepository: MagicLinkTokenRepository) {
+class MagicLinkTokenService(
+    private val analytics: Logger = LoggerFactory.getLogger(MagicLinkTokenService::class.java),
+    private val magicLinkTokenRepository: MagicLinkTokenRepository
+) {
 
     private val secureRandom = SecureRandom()
 
@@ -19,7 +25,7 @@ class MagicLinkTokenService(private val magicLinkTokenRepository: MagicLinkToken
         val bytes = ByteArray(32)
         secureRandom.nextBytes(bytes)
 
-        val token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+        val token = hashToken(Base64.getUrlEncoder().withoutPadding().encodeToString(bytes))
         magicLinkTokenRepository.save(MagicLinkToken(
             user = user,
             tokenHash = token,
@@ -28,7 +34,7 @@ class MagicLinkTokenService(private val magicLinkTokenRepository: MagicLinkToken
             used = false
         ))
 
-        return hashToken(token)
+        return token
     }
 
     private fun hashToken(token: String): String {
@@ -37,23 +43,21 @@ class MagicLinkTokenService(private val magicLinkTokenRepository: MagicLinkToken
             .joinToString("") { "%02x".format(it) }
     }
 
-    fun validate(receivedToken: String): Status {
-        val hashToken = hashToken(receivedToken)
-        magicLinkTokenRepository.findByTokenHash(hashToken)?.let { token ->
+    // TODO - make this functional.
+    fun validate(receivedToken: String) {
+        analytics.info("validate: receivedToken: $receivedToken")
+        magicLinkTokenRepository.findByTokenHash(receivedToken)?.let { token ->
             if (!token.isValid()) {
-                return Status.AUTH_FAILURE
+                analytics.info("validate: token is not valid.")
+                return
             }
 
             token.markAsUsed()
             magicLinkTokenRepository.save(token)
-            return Status.AUTH_SUCCESS
+            analytics.info("validate: Token works.")
+            return
         }
 
-        return Status.AUTH_FAILURE
+        analytics.info("validate: token not found.")
     }
-}
-
-enum class Status {
-    AUTH_SUCCESS,
-    AUTH_FAILURE
 }

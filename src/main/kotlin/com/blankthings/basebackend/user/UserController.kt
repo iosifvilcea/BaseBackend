@@ -20,7 +20,7 @@ class UserController(private val userService: UserService) {
         return ResponseEntity.ok(LoginResponse())
     }
 
-    @GetMapping("{token}")
+    @GetMapping
     fun authenticate(@RequestParam token: String) = userService.authenticate(token)
 
 }
