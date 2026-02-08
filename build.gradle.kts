@@ -1,5 +1,4 @@
 plugins {
-    kotlin("kapt") version "2.2.21"
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
     kotlin("plugin.jpa") version "2.2.21"
@@ -34,8 +33,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-
-    kapt("org.hibernate.orm:hibernate-processor:7.2.3.Final")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

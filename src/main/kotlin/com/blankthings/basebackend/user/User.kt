@@ -1,7 +1,6 @@
 package com.blankthings.basebackend.user
 
 import com.blankthings.basebackend.magiclinktoken.MagicLinkToken
-import com.blankthings.basebackend.magiclinktoken.MagicLinkToken_
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -18,7 +17,7 @@ data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_id_seq", allocationSize = 1)
-    val id: Long,
+    val id: Long? = null,
 
     @Column(unique = true, nullable = false)
     val email: String,

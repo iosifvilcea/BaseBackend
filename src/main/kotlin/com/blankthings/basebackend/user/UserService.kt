@@ -1,7 +1,5 @@
 package com.blankthings.basebackend.user
 
-import com.blankthings.basebackend.analytics.AnalyticsEvent
-import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
