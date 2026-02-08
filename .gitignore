@@ -1,4 +1,4 @@
-.env.properties
+/env.properties
 
 HELP.md
 .gradle
