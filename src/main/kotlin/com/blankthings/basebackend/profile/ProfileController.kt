@@ -8,16 +8,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/profile")
 class ProfileController(val profileService: ProfileService) {
-
-//    @PostMapping("/email")
-//    fun setEmail(@RequestParam email: String) = profileService.setEmail(email)
-
-//    @PostMapping("/username")
-//    fun setUsername(@RequestParam username: String) = profileRepository.setUsername(username)
-
     @GetMapping("/{email}")
     fun findByEmail(@PathVariable email: String) = profileService.findByEmail(email)
 
-    @GetMapping("/{id}")
+    @GetMapping("id/{id}")
     fun findById(@PathVariable id: Long): Profile = profileService.findById(id)
 }
