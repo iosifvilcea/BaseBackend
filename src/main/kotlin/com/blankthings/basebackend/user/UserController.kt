@@ -21,7 +21,12 @@ class UserController(private val userService: UserService) {
     }
 
     @GetMapping
-    fun authenticate(@RequestParam token: String) = userService.authenticate(token)
+    fun authenticate(@RequestParam token: String): ResponseEntity<AuthResponse> {
+        return when(val auth = userService.authenticate(token)) {
+            is AuthResult.Success -> ResponseEntity.ok(AuthResponse(jwt = auth.jwt))
+            AuthResult.Failed -> ResponseEntity.notFound().build()
+        }
+    }
 
 }
 
@@ -35,3 +40,5 @@ data class LoginResponse(
             If you can't find the login link in your email, be sure to check your spam folder.
         """.trimIndent()
 )
+
+data class AuthResponse(val jwt: String, val successMessage: String = "Login successful!")

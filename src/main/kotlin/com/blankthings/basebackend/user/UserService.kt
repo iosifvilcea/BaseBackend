@@ -1,10 +1,7 @@
 package com.blankthings.basebackend.user
 
-import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,7 +24,21 @@ class UserService(
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
-    fun authenticate(token: String) {
-        val status = tokenService.validate(token)
+    fun authenticate(token: String): AuthResult {
+        return tokenService.validate(token)
+            .takeIf { it is AuthResult.Success }
+            ?.let {
+                val jwt = generateJwt()
+                AuthResult.Success(jwt)
+            } ?: AuthResult.Failed
     }
+
+    private fun generateJwt(): String {
+        return "abc123"
+    }
+}
+
+sealed class AuthResult {
+    data class Success(val jwt: String) : AuthResult()
+    object Failed : AuthResult()
 }
