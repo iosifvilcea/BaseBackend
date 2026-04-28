@@ -20,7 +20,7 @@ class EmailService(private val mailSender: JavaMailSender) {
             subject = EMAIL_SUBJECT
             text = EMAIL_MESSAGE + token
         }
-        // TODO - HANDLE MailException
+
         mailSender.send(message)
         AnalyticsTracker.track(AnalyticsEvent.EMAIL_SENT, "SENDING $email with token: $token")
     }

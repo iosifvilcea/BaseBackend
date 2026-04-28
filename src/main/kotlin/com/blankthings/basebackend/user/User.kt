@@ -17,7 +17,7 @@ data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_id_seq", allocationSize = 1)
-    val id: Long? = null,
+    val id: Long = 0,
 
     @Column(unique = true, nullable = false)
     val email: String,

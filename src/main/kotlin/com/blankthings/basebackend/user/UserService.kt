@@ -1,7 +1,10 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.analytics.AnalyticsEvent
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
+import com.blankthings.basebackend.magiclinktoken.TokenStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,14 +15,23 @@ class UserService(
     private val emailService: EmailService,
     private val userRepository: UserRepository
 ) {
-    fun login(email: String) {
-        val user = userRepository.findByEmail(email) ?: createNewUser(email)
-        processLogin(user)
+    fun processEmail(email: String): AuthResult {
+        val user = findOrCreateUser(email)
+        return when (tokenService.upsertToken(user)) {
+            TokenStatus.New -> {
+                emailService.sendAuthEmail(user.email, "")
+                AuthResult.Success()
+            }
+            TokenStatus.Existing -> AuthResult.Success()
+        }
     }
 
-    private fun processLogin(user: User) {
-        val generatedToken = tokenService.generateToken(user)
-        emailService.sendAuthEmail(user.email, generatedToken)
+    fun findOrCreateUser(email: String): User {
+        return userRepository.findByEmail(email).also {
+            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): FOUND USER:$it")
+        } ?: createNewUser(email).also {
+            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): CREATED USER:$it")
+        }
     }
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
@@ -39,6 +51,6 @@ class UserService(
 }
 
 sealed class AuthResult {
-    data class Success(val jwt: String) : AuthResult()
+    data class Success(val jwt: String = "") : AuthResult()
     object Failed : AuthResult()
 }

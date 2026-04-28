@@ -19,27 +19,23 @@ class MagicLinkTokenService(
 
     private val secureRandom = SecureRandom()
 
-    fun generateToken(user: User): String {
-        val token = generateSecureToken()
-        val hashToken = hashToken(token)
-
-        val existing = magicLinkTokenRepository.findByUserId(user.id!!)
-        val entity = existing?.copy(
-            user = user,
-            tokenHash = hashToken,
-            createdAt = LocalDateTime.now(),
-            expiresAt = LocalDateTime.now().plusMinutes(15),
-            used = false,
-        ) ?: MagicLinkToken(
+    fun upsertToken(user: User): TokenStatus {
+        return magicLinkTokenRepository.findByUserId(user.id)
+            ?.takeIf {
+                it.isValid()
+            }?.let {
+                TokenStatus.Existing
+            } ?: MagicLinkToken(
                 user = user,
-                tokenHash = hashToken,
+                tokenHash = hashToken(generateSecureToken()),
                 createdAt = LocalDateTime.now(),
                 expiresAt = LocalDateTime.now().plusMinutes(15),
                 used = false
-            )
-
-        magicLinkTokenRepository.save(entity)
-        return token
+        ).let {
+            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "SAVING MAGIC LINK TOKEN:" + it.tokenHash)
+            magicLinkTokenRepository.save(it)
+            TokenStatus.New
+        }
     }
 
     fun generateSecureToken(): String {
@@ -65,7 +61,12 @@ class MagicLinkTokenService(
                 markAsUsed()
                 magicLinkTokenRepository.save(this)
             }?.let {
-                AuthResult.Success("")
+                AuthResult.Success()
             } ?: AuthResult.Failed
     }
+}
+
+sealed class TokenStatus {
+    object New: TokenStatus()
+    object Existing: TokenStatus()
 }
