@@ -1,14 +1,12 @@
 package com.blankthings.basebackend.user
 
-import com.blankthings.basebackend.analytics.AnalyticsEvent
-import com.blankthings.basebackend.analytics.AnalyticsTracker
-import com.blankthings.basebackend.auth.Session
 import com.blankthings.basebackend.auth.JwtService
 import com.blankthings.basebackend.auth.RefreshTokenService
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import com.blankthings.basebackend.magiclinktoken.TokenStatus
-import com.blankthings.basebackend.user.AuthResult.*
+import com.blankthings.basebackend.user.AuthResult.Failed
+import com.blankthings.basebackend.user.AuthResult.Success
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -62,6 +60,11 @@ class UserService(
             Session.None -> { /** No-op */ }
         }
     }
+}
+
+sealed class Session {
+    data class Data(val user: User) : Session()
+    object None : Session()
 }
 
 sealed class AuthResult {

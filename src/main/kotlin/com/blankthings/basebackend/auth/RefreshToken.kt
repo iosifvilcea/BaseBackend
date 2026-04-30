@@ -1,10 +1,8 @@
 package com.blankthings.basebackend.auth
 
 import com.blankthings.basebackend.user.User
-import com.blankthings.basebackend.utils.Utils
 import jakarta.persistence.*
 import java.time.Instant
-import kotlin.math.exp
 
 @Entity
 @Table(name = "refresh_tokens")

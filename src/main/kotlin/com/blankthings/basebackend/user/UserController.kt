@@ -30,8 +30,11 @@ class UserController(
     }
 
     @PostMapping("/refresh")
-    fun refresh(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String): ResponseEntity<AuthResponse> {
-        return buildAuthResponse(userService.refreshSession(rawRefreshToken))
+    fun refresh(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?): ResponseEntity<AuthResponse> {
+        return when (rawRefreshToken) {
+            null -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            else -> buildAuthResponse(userService.refreshSession(rawRefreshToken))
+        }
     }
 
     @PostMapping("/logout")
@@ -43,7 +46,7 @@ class UserController(
             .body(LogoutResponse())
     }
 
-    fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> {
+    private fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> {
         return when (result) {
             AuthResult.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             is AuthResult.Success -> ResponseEntity.ok()
@@ -69,4 +72,6 @@ sealed class LoginResponse {
 }
 
 data class LogoutResponse(val successMessage: String = "You have successfully logged out!")
+
+// TODO - This should carry on? Go to HOME?
 object AuthResponse

@@ -2,11 +2,13 @@ package com.blankthings.basebackend.auth
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
+import org.springframework.stereotype.Component
 import java.time.Duration
 
 const val REFRESH_TOKEN = "refresh_token"
 const val ACCESS_TOKEN = "access_token"
 
+@Component
 class CookieManager(
     @Value("\${jwt.expiration-ms}") private val jwtExpirationMs: Long,
     @Value("\${jwt.refresh-token-expiration-days}") private val refreshExpirationDays: Long,

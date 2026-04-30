@@ -21,7 +21,7 @@ class JwtAuthenticationFilter(
         chain: FilterChain
     ) {
         request.cookies
-            ?.find { it.name == "access_token" }
+            ?.find { it.name == ACCESS_TOKEN }
             ?.value
             ?.let { jwtService.validateToken(it) }
             ?.let { userId -> userRepository.findById(userId).orElse(null) }

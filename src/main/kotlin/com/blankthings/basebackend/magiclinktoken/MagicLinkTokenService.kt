@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.auth.Session
+import com.blankthings.basebackend.user.Session
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.stereotype.Service

@@ -1,5 +1,6 @@
 package com.blankthings.basebackend.auth
 
+import com.blankthings.basebackend.user.Session
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.beans.factory.annotation.Value
@@ -36,9 +37,4 @@ class RefreshTokenService(
             ?: Session.None
 
     fun revokeByUserId(userId: Long) = refreshTokenRepository.deleteByUserId(userId)
-}
-
-sealed class Session {
-    data class Data(val user: User) : Session()
-    object None : Session()
 }
