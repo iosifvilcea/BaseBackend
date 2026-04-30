@@ -9,17 +9,21 @@ import org.springframework.stereotype.Service
 
 const val EMAIL_FROM = "no-reply@blankthings.com"
 const val EMAIL_SUBJECT = "Login link for blankthings.com"
-const val EMAIL_MESSAGE = "Here's your login for blankthings.com:\n\n https://blankthings.com/api/auth?token="
+const val EMAIL_MESSAGE = "Here's your login for blankthings.com:\n\n %s/api/auth?token="
 
 @Service
 class EmailService(private val mailSender: JavaMailSender) {
+
+    @Value("\${app.url}")
+    lateinit var url: String
+
     fun sendAuthEmail(email: String, token: String) {
         val normalizedEmail = email.trim().lowercase()
         val message = SimpleMailMessage().apply {
             setTo(normalizedEmail)
             from = EMAIL_FROM
             subject = EMAIL_SUBJECT
-            text = EMAIL_MESSAGE + token
+            text = EMAIL_MESSAGE.format(url) + token
         }
 
         mailSender.send(message)
