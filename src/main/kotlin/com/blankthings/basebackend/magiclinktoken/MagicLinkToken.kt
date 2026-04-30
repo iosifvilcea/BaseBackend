@@ -3,7 +3,9 @@ package com.blankthings.basebackend.magiclinktoken
 import com.blankthings.basebackend.user.User
 import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
-import java.time.LocalDateTime
+import java.time.Instant
+
+const val EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS = 900L
 
 @Entity
 @Table(name = "magic_link_tokens")
@@ -21,11 +23,10 @@ class MagicLinkToken(
     val tokenHash: String,
 
     @NotNull
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @NotNull
-    val expiresAt: LocalDateTime = LocalDateTime.now().plusMinutes(15),
-
+    val expiresAt: Instant = Instant.now().plusSeconds(EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS),
 
     private var used: Boolean = false
 ) {
@@ -33,11 +34,18 @@ class MagicLinkToken(
         id: Long = this.id,
         user: User = this.user,
         tokenHash: String = this.tokenHash,
-        expiresAt: LocalDateTime = this.expiresAt,
-        createdAt: LocalDateTime = this.createdAt,
+        expiresAt: Instant = this.expiresAt,
+        createdAt: Instant = this.createdAt,
         used: Boolean = this.used
     ): MagicLinkToken {
-        return MagicLinkToken(id, user, tokenHash, expiresAt, createdAt, used)
+        return MagicLinkToken(
+            id = id,
+            user = user,
+            tokenHash = tokenHash,
+            createdAt = createdAt,
+            expiresAt = expiresAt,
+            used = used
+        )
     }
 
     fun markAsUsed() {
@@ -45,7 +53,7 @@ class MagicLinkToken(
     }
 
     fun isExpired(): Boolean {
-        return LocalDateTime.now().isAfter(expiresAt)
+        return Instant.now().isAfter(expiresAt)
     }
 
     fun isValid(): Boolean {

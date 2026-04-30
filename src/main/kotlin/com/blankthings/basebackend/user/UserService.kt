@@ -1,7 +1,5 @@
 package com.blankthings.basebackend.user
 
-import com.blankthings.basebackend.analytics.AnalyticsEvent
-import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import com.blankthings.basebackend.magiclinktoken.TokenStatus
@@ -18,7 +16,6 @@ class UserService(
 ) {
     fun processEmail(email: String): AuthResult {
         val user = findOrCreateUser(email)
-        AnalyticsTracker.track(AnalyticsEvent.DEBUG, "UserService: processEmail(), generating token next ..")
         return when (val linkToken = tokenService.upsertToken(user)) {
             TokenStatus.Existing -> Success()
             is TokenStatus.New -> {
@@ -29,11 +26,7 @@ class UserService(
     }
 
     fun findOrCreateUser(email: String): User {
-        return userRepository.findByEmail(email).also {
-            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): FOUND USER:${it?.email}")
-        } ?: createNewUser(email).also {
-            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): CREATED USER:${it.email}")
-        }
+        return userRepository.findByEmail(email) ?: createNewUser(email)
     }
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
@@ -45,6 +38,7 @@ class UserService(
             ?: Failed
     }
 
+    // TODO - Implement
     private fun generateJwt(): String {
         return "abc123"
     }

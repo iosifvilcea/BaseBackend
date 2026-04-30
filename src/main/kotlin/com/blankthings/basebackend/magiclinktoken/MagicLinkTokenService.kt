@@ -1,14 +1,12 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.analytics.AnalyticsEvent
-import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.user.AuthResult
 import com.blankthings.basebackend.user.User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -21,11 +19,11 @@ class MagicLinkTokenService(
 
     fun upsertToken(user: User): TokenStatus {
         return magicLinkTokenRepository.findByUserId(user.id)
-            ?.let { updateCurrentToken(user, it) }
+            ?.let(::updateCurrentToken)
             ?: refreshToken(MagicLinkToken(user = user, tokenHash = ""))
     }
 
-    private fun updateCurrentToken(user: User, token: MagicLinkToken): TokenStatus {
+    private fun updateCurrentToken(token: MagicLinkToken): TokenStatus {
         return if (!token.isValid()) {
             refreshToken(token)
         } else {
@@ -37,11 +35,10 @@ class MagicLinkTokenService(
         val rawToken = generateSecureToken()
         val refreshedToken = token.copy(
             tokenHash = hashToken(rawToken),
-            createdAt = token.createdAt,
-            expiresAt = token.expiresAt,
+            expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS),
+            createdAt = Instant.now(),
             used = false
         )
-        AnalyticsTracker.track(AnalyticsEvent.DEBUG, "SAVING MAGIC LINK TOKEN:" + token.tokenHash + "FOR USER: " + token.user.id)
         magicLinkTokenRepository.save(refreshedToken)
         return TokenStatus.New(rawToken)
     }
@@ -65,7 +62,6 @@ class MagicLinkTokenService(
             ?.takeIf {
                 it.isValid()
             }?.apply {
-                AnalyticsTracker.track(AnalyticsEvent.DEBUG, "WHATWHAT:" + isValid())
                 markAsUsed()
                 magicLinkTokenRepository.save(this)
             }?.let {
