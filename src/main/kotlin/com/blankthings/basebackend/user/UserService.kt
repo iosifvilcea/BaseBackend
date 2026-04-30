@@ -5,6 +5,7 @@ import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import com.blankthings.basebackend.magiclinktoken.TokenStatus
+import com.blankthings.basebackend.user.AuthResult.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,20 +18,21 @@ class UserService(
 ) {
     fun processEmail(email: String): AuthResult {
         val user = findOrCreateUser(email)
-        return when (tokenService.upsertToken(user)) {
-            TokenStatus.New -> {
-                emailService.sendAuthEmail(user.email, "")
-                AuthResult.Success()
+        AnalyticsTracker.track(AnalyticsEvent.DEBUG, "UserService: processEmail(), generating token next ..")
+        return when (val linkToken = tokenService.upsertToken(user)) {
+            TokenStatus.Existing -> Success()
+            is TokenStatus.New -> {
+                emailService.sendAuthEmail(user.email, linkToken.token)
+                Success()
             }
-            TokenStatus.Existing -> AuthResult.Success()
         }
     }
 
     fun findOrCreateUser(email: String): User {
         return userRepository.findByEmail(email).also {
-            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): FOUND USER:$it")
+            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): FOUND USER:${it?.email}")
         } ?: createNewUser(email).also {
-            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): CREATED USER:$it")
+            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "login(): CREATED USER:${it.email}")
         }
     }
 
@@ -38,11 +40,9 @@ class UserService(
 
     fun authenticate(token: String): AuthResult {
         return tokenService.validate(token)
-            .takeIf { it is AuthResult.Success }
-            ?.let {
-                val jwt = generateJwt()
-                AuthResult.Success(jwt)
-            } ?: AuthResult.Failed
+            .takeIf { it is Success }
+            ?.let { Success(generateJwt()) }
+            ?: Failed
     }
 
     private fun generateJwt(): String {

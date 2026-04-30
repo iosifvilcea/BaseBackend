@@ -21,24 +21,32 @@ class MagicLinkTokenService(
 
     fun upsertToken(user: User): TokenStatus {
         return magicLinkTokenRepository.findByUserId(user.id)
-            ?.takeIf {
-                it.isValid()
-            }?.let {
-                TokenStatus.Existing
-            } ?: MagicLinkToken(
-                user = user,
-                tokenHash = hashToken(generateSecureToken()),
-                createdAt = LocalDateTime.now(),
-                expiresAt = LocalDateTime.now().plusMinutes(15),
-                used = false
-        ).let {
-            AnalyticsTracker.track(AnalyticsEvent.DEBUG, "SAVING MAGIC LINK TOKEN:" + it.tokenHash)
-            magicLinkTokenRepository.save(it)
-            TokenStatus.New
+            ?.let { updateCurrentToken(user, it) }
+            ?: refreshToken(MagicLinkToken(user = user, tokenHash = ""))
+    }
+
+    private fun updateCurrentToken(user: User, token: MagicLinkToken): TokenStatus {
+        return if (!token.isValid()) {
+            refreshToken(token)
+        } else {
+            TokenStatus.Existing
         }
     }
 
-    fun generateSecureToken(): String {
+    private fun refreshToken(token: MagicLinkToken): TokenStatus {
+        val rawToken = generateSecureToken()
+        val refreshedToken = token.copy(
+            tokenHash = hashToken(rawToken),
+            createdAt = token.createdAt,
+            expiresAt = token.expiresAt,
+            used = false
+        )
+        AnalyticsTracker.track(AnalyticsEvent.DEBUG, "SAVING MAGIC LINK TOKEN:" + token.tokenHash + "FOR USER: " + token.user.id)
+        magicLinkTokenRepository.save(refreshedToken)
+        return TokenStatus.New(rawToken)
+    }
+
+    private fun generateSecureToken(): String {
         val bytes = ByteArray(32)
         secureRandom.nextBytes(bytes)
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
@@ -67,6 +75,6 @@ class MagicLinkTokenService(
 }
 
 sealed class TokenStatus {
-    object New: TokenStatus()
+    data class New(val token: String): TokenStatus()
     object Existing: TokenStatus()
 }

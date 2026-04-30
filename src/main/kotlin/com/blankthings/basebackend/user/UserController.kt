@@ -1,5 +1,7 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.analytics.AnalyticsEvent
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,6 +18,7 @@ class UserController(private val userService: UserService) {
     @PostMapping
     @ResponseBody
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
+        AnalyticsTracker.track(AnalyticsEvent.DEBUG, "UserController: login(): ->>>> ")
         return when (userService.processEmail(loginRequest.email)) {
             AuthResult.Failed -> ResponseEntity.ok(LoginResponse.Failed)
             is AuthResult.Success -> ResponseEntity.ok(LoginResponse.Success())
