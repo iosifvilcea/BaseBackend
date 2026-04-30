@@ -1,5 +1,6 @@
 src/main/resources/env.properties
 
+.claude
 HELP.md
 .gradle
 build/
