@@ -8,6 +8,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
@@ -23,11 +24,11 @@ class User(
     @Column(unique = true, nullable = false)
     val email: String,
 
-    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val magicLinkToken: MagicLinkToken? = null,
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val refreshTokens: MutableList<RefreshToken> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val refreshToken: RefreshToken? = null
+    val magicLinkToken: MagicLinkToken? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

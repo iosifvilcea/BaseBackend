@@ -12,8 +12,8 @@ class RefreshToken(
     @SequenceGenerator(name = "rt_seq", sequenceName = "rt_id_seq", allocationSize = 1)
     val id: Long = 0,
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
     @Column(nullable = false, unique = true)

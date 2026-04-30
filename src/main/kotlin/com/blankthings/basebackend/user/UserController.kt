@@ -15,7 +15,6 @@ class UserController(
     private val userService: UserService,
     private val cookieManager: CookieManager
 ) {
-
     @PostMapping
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
         return when (userService.processEmail(loginRequest.email)) {
