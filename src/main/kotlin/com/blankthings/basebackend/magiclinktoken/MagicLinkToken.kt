@@ -48,17 +48,9 @@ class MagicLinkToken(
         )
     }
 
-    fun markAsUsed() {
-        this.used = true
-    }
-
-    fun isExpired(): Boolean {
-        return Instant.now().isAfter(expiresAt)
-    }
-
-    fun isValid(): Boolean {
-        return !used && !isExpired()
-    }
+    fun markAsUsed() { this.used = true }
+    fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
+    fun isValid(): Boolean = !used && !isExpired()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

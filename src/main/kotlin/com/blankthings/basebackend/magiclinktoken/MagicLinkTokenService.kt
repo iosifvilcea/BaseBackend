@@ -1,21 +1,17 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.user.AuthResult
+import com.blankthings.basebackend.auth.Session
 import com.blankthings.basebackend.user.User
+import com.blankthings.basebackend.utils.Utils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.security.MessageDigest
-import java.security.SecureRandom
 import java.time.Instant
-import java.util.*
 
 @Service
 @Transactional
 class MagicLinkTokenService(
     private val magicLinkTokenRepository: MagicLinkTokenRepository
 ) {
-
-    private val secureRandom = SecureRandom()
 
     fun upsertToken(user: User): TokenStatus {
         return magicLinkTokenRepository.findByUserId(user.id)
@@ -32,9 +28,9 @@ class MagicLinkTokenService(
     }
 
     private fun refreshToken(token: MagicLinkToken): TokenStatus {
-        val rawToken = generateSecureToken()
+        val rawToken = Utils.generateSecureToken()
         val refreshedToken = token.copy(
-            tokenHash = hashToken(rawToken),
+            tokenHash = Utils.hashToken(rawToken),
             expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS),
             createdAt = Instant.now(),
             used = false
@@ -43,21 +39,8 @@ class MagicLinkTokenService(
         return TokenStatus.New(rawToken)
     }
 
-    private fun generateSecureToken(): String {
-        val bytes = ByteArray(32)
-        secureRandom.nextBytes(bytes)
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
-    }
-
-    private fun hashToken(token: String): String {
-        return MessageDigest.getInstance("SHA-256")
-            .digest(token.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-    }
-
-
-    fun validate(receivedToken: String): AuthResult {
-        val hashed = hashToken(receivedToken)
+    fun validate(receivedToken: String): Session {
+        val hashed = Utils.hashToken(receivedToken)
         return magicLinkTokenRepository.findByTokenHash(hashed)
             ?.takeIf {
                 it.isValid()
@@ -65,8 +48,8 @@ class MagicLinkTokenService(
                 markAsUsed()
                 magicLinkTokenRepository.save(this)
             }?.let {
-                AuthResult.Success()
-            } ?: AuthResult.Failed
+                Session.Data(user = it.user)
+            } ?: Session.None
     }
 }
 

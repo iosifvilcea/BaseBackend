@@ -1,5 +1,6 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.auth.RefreshToken
 import com.blankthings.basebackend.magiclinktoken.MagicLinkToken
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -23,7 +24,10 @@ class User(
     val email: String,
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val magicLinkToken: MagicLinkToken? = null
+    val magicLinkToken: MagicLinkToken? = null,
+
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val refreshToken: RefreshToken? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

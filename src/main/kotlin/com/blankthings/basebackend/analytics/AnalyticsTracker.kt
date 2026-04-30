@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 // TODO - Track events of all calls.
 object AnalyticsTracker {
     private val logger: Logger = LoggerFactory.getLogger(AnalyticsTracker::class.java)
-    fun track(event: AnalyticsEvent, properties: Any) {
+    fun track(event: AnalyticsEvent, properties: Any = "") {
         logger.info("$event : $properties")
     }
 }

@@ -1,14 +1,22 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.auth.ACCESS_TOKEN
+import com.blankthings.basebackend.auth.CookieManager
+import com.blankthings.basebackend.auth.REFRESH_TOKEN
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+
 @RestController
 @RequestMapping("/api/auth")
-class UserController(private val userService: UserService) {
+class UserController(
+    private val userService: UserService,
+    private val cookieManager: CookieManager
+) {
 
     @PostMapping
-    @ResponseBody
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
         return when (userService.processEmail(loginRequest.email)) {
             AuthResult.Failed -> ResponseEntity.ok(LoginResponse.Failed)
@@ -18,12 +26,32 @@ class UserController(private val userService: UserService) {
 
     @GetMapping
     fun authenticate(@RequestParam token: String): ResponseEntity<AuthResponse> {
-        return when(val auth = userService.authenticate(token)) {
-            is AuthResult.Success -> ResponseEntity.ok(AuthResponse(jwt = auth.jwt))
-            AuthResult.Failed -> ResponseEntity.notFound().build()
-        }
+        return buildAuthResponse(userService.authenticate(token))
     }
 
+    @PostMapping("/refresh")
+    fun refresh(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String): ResponseEntity<AuthResponse> {
+        return buildAuthResponse(userService.refreshSession(rawRefreshToken))
+    }
+
+    @PostMapping("/logout")
+    fun logout(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?): ResponseEntity<LogoutResponse> {
+        rawRefreshToken?.let { userService.logout(it) }
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(ACCESS_TOKEN, "/").toString())
+            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, "/api/auth").toString())
+            .body(LogoutResponse())
+    }
+
+    fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> {
+        return when (result) {
+            AuthResult.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            is AuthResult.Success -> ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookieManager.accessCookie(result.accessToken).toString())
+                .header(HttpHeaders.SET_COOKIE, cookieManager.refreshCookie(result.refreshToken).toString())
+                .body(AuthResponse)
+        }
+    }
 }
 
 data class LoginRequest(val email: String)
@@ -36,8 +64,9 @@ sealed class LoginResponse {
             Please check your email to login.
             If you can't find the login link in your email, be sure to check your spam folder.
         """.trimIndent()
-    ): LoginResponse()
+    ) : LoginResponse()
     object Failed : LoginResponse()
 }
 
-data class AuthResponse(val jwt: String, val successMessage: String = "Login successful!")
+data class LogoutResponse(val successMessage: String = "You have successfully logged out!")
+object AuthResponse
