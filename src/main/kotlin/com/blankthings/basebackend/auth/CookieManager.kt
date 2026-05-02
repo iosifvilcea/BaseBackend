@@ -35,7 +35,9 @@ class CookieManager(
     fun clearCookie(name: String, path: String): ResponseCookie =
         ResponseCookie.from(name, "")
             .httpOnly(true)
+            .secure(cookieSecure)
             .path(path)
             .maxAge(0)
+            .sameSite("Strict")
             .build()
 }

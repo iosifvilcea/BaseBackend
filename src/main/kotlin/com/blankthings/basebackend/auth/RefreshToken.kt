@@ -17,27 +17,11 @@ class RefreshToken(
     val user: User,
 
     @Column(nullable = false, unique = true)
-    val tokenHash: String,
+    var tokenHash: String,
 
     val createdAt: Instant = Instant.now(),
 
-    val expiresAt: Instant
+    var expiresAt: Instant
 ) {
-    fun copy(
-        id: Long = this.id,
-        user: User = this.user,
-        tokenHash: String = this.tokenHash,
-        createdAt: Instant = this.createdAt,
-        expiresAt: Instant = this.expiresAt
-    ): RefreshToken {
-        return RefreshToken(
-            id = id,
-            user = user,
-            tokenHash = tokenHash,
-            createdAt = createdAt,
-            expiresAt = expiresAt
-        )
-    }
-
     fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
 }

@@ -1,5 +1,6 @@
 package com.blankthings.basebackend.auth
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -17,7 +18,11 @@ class SecurityConfig(private val jwtAuthenticationFilter: JwtAuthenticationFilte
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests { auth ->
+            .exceptionHandling {
+                it.authenticationEntryPoint { _, response, exception ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.message)
+                }
+            }.authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(HttpMethod.POST, "/api/auth").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/auth").permitAll()

@@ -29,3 +29,5 @@ class GlobalExceptionHandler {
     fun handleGeneralException(ex: Exception): ResponseEntity<String> =
         ResponseEntity(ex.message ?: "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
 }
+
+class UserNotFoundException(email: String) : RuntimeException("User not found: $email")

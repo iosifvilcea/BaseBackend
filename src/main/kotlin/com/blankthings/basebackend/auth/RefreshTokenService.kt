@@ -2,6 +2,7 @@ package com.blankthings.basebackend.auth
 
 import com.blankthings.basebackend.user.Session
 import com.blankthings.basebackend.user.User
+import com.blankthings.basebackend.user.toUserDto
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -18,10 +19,10 @@ class RefreshTokenService(
     fun createOrRotate(user: User): String {
         val expiresAt = Instant.now().plusSeconds(expirationDays * 24 * 3600)
         val rawToken = Utils.generateSecureToken()
-        val token = refreshTokenRepository.findByUserId(user.id)?.copy(
-            tokenHash = Utils.hashToken(rawToken),
-            expiresAt = expiresAt
-        ) ?: RefreshToken(
+        val token = refreshTokenRepository.findByUserId(user.id)?.apply {
+            this.tokenHash = Utils.hashToken(rawToken)
+            this.expiresAt = expiresAt
+        } ?: RefreshToken(
             user = user,
             tokenHash = Utils.hashToken(rawToken),
             expiresAt = expiresAt

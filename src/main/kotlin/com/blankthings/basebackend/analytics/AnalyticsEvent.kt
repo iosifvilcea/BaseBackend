@@ -10,6 +10,8 @@ enum class AnalyticsEvent {
     USER_FETCHED,
     USERS_FETCHED,
 
+    AUTH_ERROR,
+
     AUTH_SUCCESSFUL,
     AUTH_FAILED,
 

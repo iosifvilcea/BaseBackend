@@ -20,12 +20,13 @@ class UserService(
     private val userRepository: UserRepository
 ) {
     fun processEmail(email: String): AuthResult {
-        val user = findOrCreateUser(email)
-        return when (val linkToken = magicLinkTokenService.upsertToken(user)) {
-            TokenStatus.Existing -> Success()
-            is TokenStatus.New -> {
-                emailService.sendAuthEmail(user.email, linkToken.token)
-                Success()
+        return findOrCreateUser(email).let { user ->
+            when (val linkToken = magicLinkTokenService.upsertToken(user)) {
+                TokenStatus.Existing -> Success()
+                is TokenStatus.New -> {
+                    emailService.sendAuthEmail(user.email, linkToken.token)
+                    Success()
+                }
             }
         }
     }
@@ -37,11 +38,11 @@ class UserService(
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
     fun authenticate(token: String): AuthResult {
-        return mapToAuthResult(magicLinkTokenService.validate(token))
+        return magicLinkTokenService.validate(token).let(::mapToAuthResult)
     }
 
     fun refreshSession(rawRefreshToken: String): AuthResult {
-        return mapToAuthResult(jwtRefreshTokenService.validate(rawRefreshToken))
+        return jwtRefreshTokenService.validate(rawRefreshToken).let(::mapToAuthResult)
     }
 
     private fun mapToAuthResult(session: Session): AuthResult {

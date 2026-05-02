@@ -47,3 +47,10 @@ class User(
         return result
     }
 }
+
+data class UserDto(val id: Long, val email: String)
+
+fun User.toUserDto() = UserDto(
+    id = this.id,
+    email = this.email
+)

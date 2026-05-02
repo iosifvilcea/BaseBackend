@@ -1,6 +1,9 @@
 package com.blankthings.basebackend.auth
 
+import com.blankthings.basebackend.analytics.AnalyticsEvent
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.user.User
+import com.blankthings.basebackend.user.toUserDto
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
@@ -28,12 +31,14 @@ class JwtService(
         try {
             Jwts.parser()
                 .verifyWith(signingKey())
+                .clockSkewSeconds(60)
                 .build()
                 .parseSignedClaims(token)
                 .payload
                 .subject
                 .toLongOrNull()
         } catch (e: JwtException) {
+            AnalyticsTracker.track(AnalyticsEvent.AUTH_ERROR, "Error parsing JWT Token.", e)
             null
         }
 
