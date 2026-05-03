@@ -1,6 +1,5 @@
 package com.blankthings.basebackend.user
 
-import com.blankthings.basebackend.auth.ACCESS_TOKEN
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.REFRESH_TOKEN
 import org.springframework.http.HttpHeaders
@@ -37,15 +36,6 @@ class UserController(
         }
     }
 
-    @PostMapping("/logout")
-    fun logout(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?): ResponseEntity<LogoutResponse> {
-        rawRefreshToken?.let { userService.logout(it) }
-        return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(ACCESS_TOKEN, "/").toString())
-            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, AUTH_URL_PATH).toString())
-            .body(LogoutResponse())
-    }
-
     private fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> {
         return when (result) {
             AuthResult.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -70,8 +60,6 @@ sealed class LoginResponse {
     ) : LoginResponse()
     object Failed : LoginResponse()
 }
-
-data class LogoutResponse(val successMessage: String = "You have successfully logged out!")
 
 // TODO - This should carry on? Go to HOME?
 object AuthResponse
