@@ -5,7 +5,7 @@ import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
 import java.time.Instant
 
-const val EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS = 900L
+const val EXPIRATION_TIME_15_MINS_IN_SECONDS = 900L
 
 @Entity
 @Table(name = "magic_link_tokens")
@@ -26,7 +26,7 @@ class MagicLinkToken(
     val createdAt: Instant = Instant.now(),
 
     @NotNull
-    val expiresAt: Instant = Instant.now().plusSeconds(EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS),
+    val expiresAt: Instant = Instant.now().plusSeconds(EXPIRATION_TIME_15_MINS_IN_SECONDS),
 
     private var used: Boolean = false
 ) {

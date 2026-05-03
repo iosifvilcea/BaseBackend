@@ -31,7 +31,7 @@ class MagicLinkTokenService(
         val rawToken = Utils.generateSecureToken()
         val refreshedToken = token.copy(
             tokenHash = Utils.hashToken(rawToken),
-            expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_OF_15_MINUTES_IN_SECONDS),
+            expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_15_MINS_IN_SECONDS),
             createdAt = Instant.now(),
             used = false
         )

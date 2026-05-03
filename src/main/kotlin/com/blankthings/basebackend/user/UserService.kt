@@ -50,7 +50,7 @@ class UserService(
             Session.None -> Failed
             is Session.Data -> Success(
                 accessToken = jwtService.generateAccessToken(session.user),
-                refreshToken = jwtRefreshTokenService.createOrRotate(session.user)
+                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(session.user)
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.blankthings.basebackend.auth
 
+import com.blankthings.basebackend.user.AUTH_URL_PATH
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
 import org.springframework.stereotype.Component
@@ -27,7 +28,7 @@ class CookieManager(
         ResponseCookie.from(REFRESH_TOKEN, token)
             .httpOnly(true)
             .secure(cookieSecure)
-            .path("/api/auth")
+            .path(AUTH_URL_PATH)
             .maxAge(Duration.ofDays(refreshExpirationDays))
             .sameSite("Strict")
             .build()

@@ -8,9 +8,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+const val AUTH_URL_PATH = "/api/auth"
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(AUTH_URL_PATH)
 class UserController(
     private val userService: UserService,
     private val cookieManager: CookieManager
@@ -41,7 +42,7 @@ class UserController(
         rawRefreshToken?.let { userService.logout(it) }
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(ACCESS_TOKEN, "/").toString())
-            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, "/api/auth").toString())
+            .header(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, AUTH_URL_PATH).toString())
             .body(LogoutResponse())
     }
 
