@@ -2,14 +2,17 @@ package com.blankthings.basebackend.auth
 
 import com.blankthings.basebackend.user.AUTH_URL_PATH
 import com.blankthings.basebackend.user.UserService
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.Authentication
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
@@ -22,8 +25,9 @@ class SecurityConfig(
 ) {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf { it.disable() }
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
+        http
+            .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .exceptionHandling {
                 it.authenticationEntryPoint { _, response, exception ->
@@ -32,27 +36,27 @@ class SecurityConfig(
             }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(HttpMethod.POST, "/api/auth").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/auth").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                    .requestMatchers(HttpMethod.POST, AUTH_URL_PATH).permitAll()
+                    .requestMatchers(HttpMethod.GET, AUTH_URL_PATH).permitAll()
+                    .requestMatchers(HttpMethod.POST, "$AUTH_URL_PATH/refresh").permitAll()
                     .anyRequest().authenticated()
             }
             .logout { logout ->
                 logout
                     .logoutUrl("$AUTH_URL_PATH/logout")
-                    .addLogoutHandler { request, response, _ ->
-                        request.cookies
-                            ?.find { it.name == REFRESH_TOKEN }
-                            ?.value
-                            ?.let { userService.logout(it) }
-
-                        response.addHeader(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(ACCESS_TOKEN, "/").toString())
-                        response.addHeader(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, AUTH_URL_PATH).toString())
-                    }
-                    .logoutSuccessHandler { _, response, _ -> response.status = 200 }
+                    .addLogoutHandler(::clearAuthCookies)
+                    .logoutSuccessHandler { _, response, _ -> response.status = HttpStatus.OK.value() }
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .build()
 
-        return http.build()
+    private fun clearAuthCookies(request: HttpServletRequest, response: HttpServletResponse, auth: Authentication?) {
+        request.cookies
+            ?.find { it.name == REFRESH_TOKEN }
+            ?.value
+            ?.let(userService::logout)
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(ACCESS_TOKEN, "/").toString())
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieManager.clearCookie(REFRESH_TOKEN, AUTH_URL_PATH).toString())
     }
 }
