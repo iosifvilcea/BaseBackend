@@ -8,7 +8,6 @@ enum class AnalyticsEvent {
     USER_DELETED,
     USER_UPDATED,
     USER_FETCHED,
-    USERS_FETCHED,
 
     AUTH_ERROR,
 

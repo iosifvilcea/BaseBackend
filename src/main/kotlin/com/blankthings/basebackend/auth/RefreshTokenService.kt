@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.auth
 
-import com.blankthings.basebackend.user.Session
+import com.blankthings.basebackend.user.SessionResult
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.beans.factory.annotation.Value
@@ -16,10 +16,18 @@ class RefreshTokenService(
 ) {
 
     fun createOrRotateRefreshToken(user: User): String {
-        val expiresAt = Instant.now().plusSeconds(expirationDays * 24 * 3600)
         val rawToken = Utils.generateSecureToken()
-        val hashToken = Utils.hashToken(rawToken)
-        val token = refreshTokenRepository.findByUserId(user.id)?.apply {
+        val token = findOrCreateRefreshToken(
+            user,
+            Utils.hashToken(rawToken),
+            Instant.now().plusSeconds(expirationDays * 24 * 3600)
+        )
+        refreshTokenRepository.save(token)
+        return rawToken
+    }
+
+    private fun findOrCreateRefreshToken(user: User, hashToken: String, expiresAt: Instant) =
+        refreshTokenRepository.findByUserId(user.id)?.apply {
             this.tokenHash = hashToken
             this.expiresAt = expiresAt
         } ?: RefreshToken(
@@ -27,16 +35,13 @@ class RefreshTokenService(
             tokenHash = hashToken,
             expiresAt = expiresAt
         )
-        refreshTokenRepository.save(token)
-        return rawToken
-    }
 
-    fun validate(rawToken: String): Session =
+    fun validate(rawToken: String): SessionResult =
         Utils.hashToken(rawToken)
             .let { refreshTokenRepository.findByTokenHash(it) }
             ?.takeIf { !it.isExpired() }
-            ?.let { Session.Data(user = it.user) }
-            ?: Session.None
+            ?.let { SessionResult.Data(user = it.user) }
+            ?: SessionResult.None
 
     fun revokeByUserId(userId: Long) = refreshTokenRepository.deleteByUserId(userId)
 }

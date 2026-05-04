@@ -40,25 +40,25 @@ class UserService(
     fun refreshSession(rawRefreshToken: String): AuthResult =
         jwtRefreshTokenService.validate(rawRefreshToken).let(::mapToAuthResult)
 
-    private fun mapToAuthResult(session: Session): AuthResult =
-        when (session) {
-            Session.None -> Failed
-            is Session.Data -> Success(
-                accessToken = jwtService.generateAccessToken(session.user),
-                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(session.user)
+    private fun mapToAuthResult(sessionResult: SessionResult): AuthResult =
+        when (sessionResult) {
+            SessionResult.None -> Failed
+            is SessionResult.Data -> Success(
+                accessToken = jwtService.generateAccessToken(sessionResult.user),
+                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(sessionResult.user)
             )
         }
 
     fun logout(rawRefreshToken: String) =
         when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
-            is Session.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
-            Session.None -> { /** No-op */ }
+            is SessionResult.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
+            SessionResult.None -> { /** No-op */ }
         }
 }
 
-sealed class Session {
-    data class Data(val user: User) : Session()
-    object None : Session()
+sealed class SessionResult {
+    data class Data(val user: User) : SessionResult()
+    object None : SessionResult()
 }
 
 sealed class AuthResult {
