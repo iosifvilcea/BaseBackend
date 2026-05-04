@@ -16,35 +16,31 @@ class UserController(
     private val cookieManager: CookieManager
 ) {
     @PostMapping
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
-        return when (userService.processEmail(loginRequest.email)) {
+    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> =
+        when (userService.processEmail(loginRequest.email)) {
             AuthResult.Failed -> ResponseEntity.ok(LoginResponse.Failed)
             is AuthResult.Success -> ResponseEntity.ok(LoginResponse.Success())
         }
-    }
 
     @GetMapping
-    fun authenticate(@RequestParam token: String): ResponseEntity<AuthResponse> {
-        return buildAuthResponse(userService.authenticate(token))
-    }
+    fun authenticate(@RequestParam token: String): ResponseEntity<AuthResponse> =
+        buildAuthResponse(userService.authenticate(token))
 
     @PostMapping("/refresh")
-    fun refresh(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?): ResponseEntity<AuthResponse> {
-        return when (rawRefreshToken) {
+    fun refresh(@CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?): ResponseEntity<AuthResponse> =
+        when (rawRefreshToken) {
             null -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             else -> buildAuthResponse(userService.refreshSession(rawRefreshToken))
         }
-    }
 
-    private fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> {
-        return when (result) {
+    private fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> =
+        when (result) {
             AuthResult.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             is AuthResult.Success -> ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookieManager.accessCookie(result.accessToken).toString())
                 .header(HttpHeaders.SET_COOKIE, cookieManager.refreshCookie(result.refreshToken).toString())
                 .body(AuthResponse)
         }
-    }
 }
 
 data class LoginRequest(val email: String)

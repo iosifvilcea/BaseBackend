@@ -19,13 +19,12 @@ class MagicLinkTokenService(
             ?: refreshToken(MagicLinkToken(user = user, tokenHash = ""))
     }
 
-    private fun updateCurrentToken(token: MagicLinkToken): TokenStatus {
-        return if (!token.isValid()) {
+    private fun updateCurrentToken(token: MagicLinkToken): TokenStatus =
+        if (!token.isValid()) {
             refreshToken(token)
         } else {
             TokenStatus.Existing
         }
-    }
 
     private fun refreshToken(token: MagicLinkToken): TokenStatus {
         val rawToken = Utils.generateSecureToken()
@@ -39,9 +38,9 @@ class MagicLinkTokenService(
         return TokenStatus.New(rawToken)
     }
 
-    fun validate(receivedToken: String): Session {
-        val hashed = Utils.hashToken(receivedToken)
-        return magicLinkTokenRepository.findByTokenHash(hashed)
+    fun validate(receivedToken: String): Session =
+        Utils.hashToken(receivedToken)
+            .let { magicLinkTokenRepository.findByTokenHash(it) }
             ?.takeIf {
                 it.isValid()
             }?.apply {
@@ -50,7 +49,6 @@ class MagicLinkTokenService(
             }?.let {
                 Session.Data(user = it.user)
             } ?: Session.None
-    }
 }
 
 sealed class TokenStatus {

@@ -19,8 +19,8 @@ class UserService(
     private val jwtRefreshTokenService: RefreshTokenService,
     private val userRepository: UserRepository
 ) {
-    fun processEmail(email: String): AuthResult {
-        return findOrCreateUser(email).let { user ->
+    fun processEmail(email: String): AuthResult =
+        findOrCreateUser(email).let { user ->
             when (val linkToken = magicLinkTokenService.upsertToken(user)) {
                 TokenStatus.Existing -> Success()
                 is TokenStatus.New -> {
@@ -29,38 +29,31 @@ class UserService(
                 }
             }
         }
-    }
 
-    fun findOrCreateUser(email: String): User {
-        return userRepository.findByEmail(email) ?: createNewUser(email)
-    }
+    fun findOrCreateUser(email: String): User = userRepository.findByEmail(email) ?: createNewUser(email)
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
-    fun authenticate(token: String): AuthResult {
-        return magicLinkTokenService.validate(token).let(::mapToAuthResult)
-    }
+    fun authenticate(token: String): AuthResult =
+        magicLinkTokenService.validate(token).let(::mapToAuthResult)
 
-    fun refreshSession(rawRefreshToken: String): AuthResult {
-        return jwtRefreshTokenService.validate(rawRefreshToken).let(::mapToAuthResult)
-    }
+    fun refreshSession(rawRefreshToken: String): AuthResult =
+        jwtRefreshTokenService.validate(rawRefreshToken).let(::mapToAuthResult)
 
-    private fun mapToAuthResult(session: Session): AuthResult {
-        return when (session) {
+    private fun mapToAuthResult(session: Session): AuthResult =
+        when (session) {
             Session.None -> Failed
             is Session.Data -> Success(
                 accessToken = jwtService.generateAccessToken(session.user),
                 refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(session.user)
             )
         }
-    }
 
-    fun logout(rawRefreshToken: String) {
+    fun logout(rawRefreshToken: String) =
         when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
             is Session.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
             Session.None -> { /** No-op */ }
         }
-    }
 }
 
 sealed class Session {
