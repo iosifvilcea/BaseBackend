@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    kotlin("plugin.jpa") version "2.2.21"
-    id("org.springframework.boot") version "4.0.0"
-    id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.jpa)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = "com.blankthings"
@@ -27,23 +27,23 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-mail")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.mail)
+    implementation(libs.kotlin.reflect)
 
-    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
+    implementation(libs.jwt.jjwt.api)
+    runtimeOnly(libs.jwt.jjwt.impl)
+    runtimeOnly(libs.jwt.jjwt.jackson)
 
-    runtimeOnly("org.postgresql:postgresql")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    runtimeOnly(libs.postgresql)
+    developmentOnly(libs.spring.boot.devtools)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.kotlin.test.junit5)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 kotlin {
