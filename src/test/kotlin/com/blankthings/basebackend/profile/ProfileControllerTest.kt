@@ -4,6 +4,7 @@ import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
 import com.blankthings.basebackend.user.UserRepository
 import com.blankthings.basebackend.user.UserService
+import com.blankthings.basebackend.UserNotFoundException
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -83,11 +84,11 @@ class ProfileControllerTest {
 
     @Test
     @WithMockUser
-    fun `GET findById returns 500 when not found`() {
-        given(profileService.findById(99L)).willThrow(NoSuchElementException("not found"))
+    fun `GET findById returns 404 when not found`() {
+        given(profileService.findById(99L)).willThrow(UserNotFoundException("id: 99"))
 
         mockMvc.get("/api/profile/id/99").andExpect {
-            status { isInternalServerError() }
+            status { isNotFound() }
         }
     }
 
