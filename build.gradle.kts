@@ -42,6 +42,7 @@ dependencies {
     developmentOnly(libs.spring.boot.devtools)
 
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.starter.webmvc.test)
     testImplementation(libs.kotlin.test.junit5)
     testImplementation(libs.mockk)
     testRuntimeOnly(libs.junit.platform.launcher)
