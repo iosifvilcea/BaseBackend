@@ -30,7 +30,7 @@ class UserService(
             }
         }
 
-    fun findOrCreateUser(email: String): User = userRepository.findByEmail(email) ?: createNewUser(email)
+    private fun findOrCreateUser(email: String): User = userRepository.findByEmail(email) ?: createNewUser(email)
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
