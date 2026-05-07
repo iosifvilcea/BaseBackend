@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.user.SessionResult
+import com.blankthings.basebackend.user.Result
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.stereotype.Service
@@ -38,7 +38,7 @@ class MagicLinkTokenService(
         return TokenStatus.New(rawToken)
     }
 
-    fun validate(receivedToken: String): SessionResult =
+    fun validate(receivedToken: String): Result =
         Utils.hashToken(receivedToken)
             .let { magicLinkTokenRepository.findByTokenHash(it) }
             ?.takeIf {
@@ -47,8 +47,8 @@ class MagicLinkTokenService(
                 markAsUsed()
                 magicLinkTokenRepository.save(this)
             }?.let {
-                SessionResult.Data(user = it.user)
-            } ?: SessionResult.None
+                Result.Data(user = it.user)
+            } ?: Result.None
 }
 
 sealed class TokenStatus {

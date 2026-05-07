@@ -49,7 +49,7 @@ class UserControllerTest {
 
     @Test
     fun `POST login returns 200 with success message when email is processed`() {
-        given(userService.processEmail(any())).willReturn(AuthResult.Success())
+        given(userService.processEmail(any())).willReturn(Session.Data())
 
         mockMvc.post("/api/auth") {
             contentType = MediaType.APPLICATION_JSON
@@ -62,7 +62,7 @@ class UserControllerTest {
 
     @Test
     fun `POST login returns 200 when processEmail returns Failed`() {
-        given(userService.processEmail(any())).willReturn(AuthResult.Failed)
+        given(userService.processEmail(any())).willReturn(Session.Failed)
 
         mockMvc.post("/api/auth") {
             contentType = MediaType.APPLICATION_JSON
@@ -85,7 +85,7 @@ class UserControllerTest {
 
     @Test
     fun `GET authenticate returns 200 and sets cookies when token is valid`() {
-        given(userService.authenticate("validtoken")).willReturn(AuthResult.Success("access", "refresh"))
+        given(userService.authenticate("validtoken")).willReturn(Session.Data("access", "refresh"))
         stubAuthCookies()
 
         mockMvc.get("/api/auth") {
@@ -98,7 +98,7 @@ class UserControllerTest {
 
     @Test
     fun `GET authenticate returns 401 when token is invalid`() {
-        given(userService.authenticate("badtoken")).willReturn(AuthResult.Failed)
+        given(userService.authenticate("badtoken")).willReturn(Session.Failed)
 
         mockMvc.get("/api/auth") {
             param("token", "badtoken")
@@ -125,7 +125,7 @@ class UserControllerTest {
 
     @Test
     fun `POST refresh returns 200 and sets cookies when refresh token is valid`() {
-        given(userService.refreshSession("rawrefresh")).willReturn(AuthResult.Success("access", "refresh"))
+        given(userService.refreshSession("rawrefresh")).willReturn(Session.Data("access", "refresh"))
         stubAuthCookies()
 
         mockMvc.post("/api/auth/refresh") {
@@ -138,7 +138,7 @@ class UserControllerTest {
 
     @Test
     fun `POST refresh returns 401 when refresh token is invalid`() {
-        given(userService.refreshSession("badrefresh")).willReturn(AuthResult.Failed)
+        given(userService.refreshSession("badrefresh")).willReturn(Session.Failed)
 
         mockMvc.post("/api/auth/refresh") {
             cookie(Cookie(REFRESH_TOKEN, "badrefresh"))

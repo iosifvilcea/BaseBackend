@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.auth
 
-import com.blankthings.basebackend.user.SessionResult
+import com.blankthings.basebackend.user.Result
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import org.springframework.beans.factory.annotation.Value
@@ -36,12 +36,12 @@ class RefreshTokenService(
             expiresAt = expiresAt
         )
 
-    fun validate(rawToken: String): SessionResult =
+    fun validate(rawToken: String): Result =
         Utils.hashToken(rawToken)
             .let { refreshTokenRepository.findByTokenHash(it) }
             ?.takeIf { !it.isExpired() }
-            ?.let { SessionResult.Data(user = it.user) }
-            ?: SessionResult.None
+            ?.let { Result.Data(user = it.user) }
+            ?: Result.None
 
     fun revokeByUserId(userId: Long) = refreshTokenRepository.deleteByUserId(userId)
 }

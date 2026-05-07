@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.user.SessionResult
+import com.blankthings.basebackend.user.Result
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import io.mockk.every
@@ -129,7 +129,7 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(SessionResult.None, result)
+        assertEquals(Result.None, result)
     }
 
     @Test
@@ -143,7 +143,7 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(SessionResult.None, result)
+        assertEquals(Result.None, result)
     }
 
     @Test
@@ -158,7 +158,7 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(SessionResult.None, result)
+        assertEquals(Result.None, result)
     }
 
     @Test
@@ -172,8 +172,8 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertTrue(result is SessionResult.Data)
-        assertEquals(user, (result as SessionResult.Data).user)
+        assertTrue(result is Result.Data)
+        assertEquals(user, (result as Result.Data).user)
     }
 
     @Test

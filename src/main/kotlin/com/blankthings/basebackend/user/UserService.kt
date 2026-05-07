@@ -5,8 +5,7 @@ import com.blankthings.basebackend.auth.RefreshTokenService
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import com.blankthings.basebackend.magiclinktoken.TokenStatus
-import com.blankthings.basebackend.user.AuthResult.Failed
-import com.blankthings.basebackend.user.AuthResult.Success
+import com.blankthings.basebackend.user.Session.Data
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,13 +18,13 @@ class UserService(
     private val jwtRefreshTokenService: RefreshTokenService,
     private val userRepository: UserRepository
 ) {
-    fun processEmail(email: String): AuthResult =
+    fun processEmail(email: String): Session =
         findOrCreateUser(email).let { user ->
             when (val linkToken = magicLinkTokenService.upsertToken(user)) {
-                TokenStatus.Existing -> Success()
+                TokenStatus.Existing -> Data()
                 is TokenStatus.New -> {
                     emailService.sendAuthEmail(user.email, linkToken.token)
-                    Success()
+                    Data()
                 }
             }
         }
@@ -34,34 +33,34 @@ class UserService(
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
-    fun authenticate(token: String): AuthResult =
-        magicLinkTokenService.validate(token).let(::mapToAuthResult)
+    fun authenticate(token: String): Session =
+        magicLinkTokenService.validate(token).let(::issueSession)
 
-    fun refreshSession(rawRefreshToken: String): AuthResult =
-        jwtRefreshTokenService.validate(rawRefreshToken).let(::mapToAuthResult)
+    fun refreshSession(rawRefreshToken: String): Session =
+        jwtRefreshTokenService.validate(rawRefreshToken).let(::issueSession)
 
-    private fun mapToAuthResult(sessionResult: SessionResult): AuthResult =
-        when (sessionResult) {
-            SessionResult.None -> Failed
-            is SessionResult.Data -> Success(
-                accessToken = jwtService.generateAccessToken(sessionResult.user),
-                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(sessionResult.user)
+    private fun issueSession(result: Result): Session =
+        when (result) {
+            Result.None -> Session.None
+            is Result.Data -> Data(
+                accessToken = jwtService.generateAccessToken(result.user),
+                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(result.user)
             )
         }
 
     fun logout(rawRefreshToken: String) =
         when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
-            is SessionResult.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
-            SessionResult.None -> { /** No-op */ }
+            is Result.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
+            Result.None -> { /** No-op */ }
         }
 }
 
-sealed class SessionResult {
-    data class Data(val user: User) : SessionResult()
-    object None : SessionResult()
+sealed class Result {
+    data class Data(val user: User) : Result()
+    object None : Result()
 }
 
-sealed class AuthResult {
-    data class Success(val accessToken: String = "", val refreshToken: String = "") : AuthResult()
-    object Failed : AuthResult()
+sealed class Session {
+    data class Data(val accessToken: String = "", val refreshToken: String = "") : Session()
+    object None : Session()
 }

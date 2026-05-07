@@ -18,8 +18,8 @@ class UserController(
     @PostMapping
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> =
         when (userService.processEmail(loginRequest.email)) {
-            AuthResult.Failed -> ResponseEntity.ok(LoginResponse.Failed)
-            is AuthResult.Success -> ResponseEntity.ok(LoginResponse.Success())
+            Session.Failed -> ResponseEntity.ok(LoginResponse.Failed)
+            is Session.Data -> ResponseEntity.ok(LoginResponse.Success())
         }
 
     @GetMapping
@@ -33,10 +33,10 @@ class UserController(
             else -> buildAuthResponse(userService.refreshSession(rawRefreshToken))
         }
 
-    private fun buildAuthResponse(result: AuthResult): ResponseEntity<AuthResponse> =
+    private fun buildAuthResponse(result: Session): ResponseEntity<AuthResponse> =
         when (result) {
-            AuthResult.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-            is AuthResult.Success -> ResponseEntity.ok()
+            Session.Failed -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            is Session.Data -> ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookieManager.accessCookie(result.accessToken).toString())
                 .header(HttpHeaders.SET_COOKIE, cookieManager.refreshCookie(result.refreshToken).toString())
                 .body(AuthResponse)

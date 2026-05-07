@@ -46,7 +46,7 @@ class UserServiceTest {
 
         val result = service.processEmail(user.email)
 
-        assertTrue(result is AuthResult.Success)
+        assertTrue(result is Session.Data)
         verify(exactly = 1) { emailService.sendAuthEmail(user.email, "rawtoken") }
     }
 
@@ -57,7 +57,7 @@ class UserServiceTest {
 
         val result = service.processEmail(user.email)
 
-        assertTrue(result is AuthResult.Success)
+        assertTrue(result is Session.Data)
         verify(exactly = 0) { emailService.sendAuthEmail(any(), any()) }
     }
 
@@ -87,57 +87,57 @@ class UserServiceTest {
 
     @Test
     fun `authenticate returns Success with tokens when magic link token is valid`() {
-        every { magicLinkTokenService.validate("rawtoken") } returns SessionResult.Data(user)
+        every { magicLinkTokenService.validate("rawtoken") } returns Result.Data(user)
         every { jwtService.generateAccessToken(user) } returns "access-token"
         every { refreshTokenService.createOrRotateRefreshToken(user) } returns "refresh-token"
 
         val result = service.authenticate("rawtoken")
 
-        assertTrue(result is AuthResult.Success)
-        result as AuthResult.Success
+        assertTrue(result is Session.Data)
+        result as Session.Data
         assertEquals("access-token", result.accessToken)
         assertEquals("refresh-token", result.refreshToken)
     }
 
     @Test
     fun `authenticate returns Failed when magic link token is invalid`() {
-        every { magicLinkTokenService.validate("badtoken") } returns SessionResult.None
+        every { magicLinkTokenService.validate("badtoken") } returns Result.None
 
         val result = service.authenticate("badtoken")
 
-        assertEquals(AuthResult.Failed, result)
+        assertEquals(Session.Failed, result)
     }
 
     // --- refreshSession ---
 
     @Test
     fun `refreshSession returns Success with new tokens when refresh token is valid`() {
-        every { refreshTokenService.validate("rawrefresh") } returns SessionResult.Data(user)
+        every { refreshTokenService.validate("rawrefresh") } returns Result.Data(user)
         every { jwtService.generateAccessToken(user) } returns "new-access-token"
         every { refreshTokenService.createOrRotateRefreshToken(user) } returns "new-refresh-token"
 
         val result = service.refreshSession("rawrefresh")
 
-        assertTrue(result is AuthResult.Success)
-        result as AuthResult.Success
+        assertTrue(result is Session.Data)
+        result as Session.Data
         assertEquals("new-access-token", result.accessToken)
         assertEquals("new-refresh-token", result.refreshToken)
     }
 
     @Test
     fun `refreshSession returns Failed when refresh token is invalid`() {
-        every { refreshTokenService.validate("badrefresh") } returns SessionResult.None
+        every { refreshTokenService.validate("badrefresh") } returns Result.None
 
         val result = service.refreshSession("badrefresh")
 
-        assertEquals(AuthResult.Failed, result)
+        assertEquals(Session.Failed, result)
     }
 
     // --- logout ---
 
     @Test
     fun `logout revokes refresh token when it is valid`() {
-        every { refreshTokenService.validate("rawrefresh") } returns SessionResult.Data(user)
+        every { refreshTokenService.validate("rawrefresh") } returns Result.Data(user)
         every { refreshTokenService.revokeByUserId(user.id) } returns Unit
 
         service.logout("rawrefresh")
@@ -147,7 +147,7 @@ class UserServiceTest {
 
     @Test
     fun `logout does nothing when refresh token is invalid`() {
-        every { refreshTokenService.validate("badrefresh") } returns SessionResult.None
+        every { refreshTokenService.validate("badrefresh") } returns Result.None
 
         service.logout("badrefresh")
 
