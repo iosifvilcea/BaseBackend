@@ -21,12 +21,10 @@ class UserService(
     fun processEmail(email: String): Session =
         findOrCreateUser(email).let { user ->
             when (val linkToken = magicLinkTokenService.upsertToken(user)) {
-                TokenStatus.Existing -> Data()
-                is TokenStatus.New -> {
-                    emailService.sendAuthEmail(user.email, linkToken.token)
-                    Data()
-                }
+                TokenStatus.Existing -> { /** No-op. */ }
+                is TokenStatus.New -> emailService.sendAuthEmail(user.email, linkToken.token)
             }
+            Data() // TODO - I don't like this.
         }
 
     private fun findOrCreateUser(email: String): User = userRepository.findByEmail(email) ?: createNewUser(email)
