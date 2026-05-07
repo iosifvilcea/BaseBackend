@@ -16,10 +16,11 @@ import javax.crypto.SecretKey
 class JwtService(
     @Value("\${jwt.secret}") private val secret: String,
     @Value("\${jwt.expiration-ms}") private val expirationMs: Long,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
 ) {
     fun generateAccessToken(user: User): String =
-        Jwts.builder()
+        Jwts
+            .builder()
             .subject(user.id.toString())
             .claim("email", user.email)
             .issuedAt(Date())
@@ -29,7 +30,8 @@ class JwtService(
 
     fun validateToken(token: String): Long? =
         try {
-            Jwts.parser()
+            Jwts
+                .parser()
                 .verifyWith(signingKey())
                 .clockSkewSeconds(60)
                 .build()
@@ -42,6 +44,5 @@ class JwtService(
             null
         }
 
-    private fun signingKey(): SecretKey =
-        Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret))
+    private fun signingKey(): SecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret))
 }

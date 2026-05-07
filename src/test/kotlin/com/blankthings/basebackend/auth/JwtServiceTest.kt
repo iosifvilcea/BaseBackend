@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class JwtServiceTest {
-
     // 32-byte key (256-bit) — minimum required for HMAC-SHA256
     private val testSecret = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
     private val oneHourMs = 3_600_000L

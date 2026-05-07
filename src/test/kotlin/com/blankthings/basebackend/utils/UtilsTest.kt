@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import java.util.Base64
 
 class UtilsTest {
-
     @Test
     fun `generateSecureToken returns a non-blank string`() {
         val token = Utils.generateSecureToken()

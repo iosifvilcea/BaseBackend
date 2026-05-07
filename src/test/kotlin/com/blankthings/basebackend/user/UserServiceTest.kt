@@ -16,20 +16,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UserServiceTest {
-
     private val magicLinkTokenService = mockk<MagicLinkTokenService>()
     private val emailService = mockk<EmailService>()
     private val jwtService = mockk<JwtService>()
     private val refreshTokenService = mockk<RefreshTokenService>()
     private val userRepository = mockk<UserRepository>()
 
-    private val service = UserService(
-        magicLinkTokenService,
-        emailService,
-        jwtService,
-        refreshTokenService,
-        userRepository
-    )
+    private val service =
+        UserService(
+            magicLinkTokenService,
+            emailService,
+            jwtService,
+            refreshTokenService,
+            userRepository,
+        )
 
     private val user = User(id = 1L, email = "user@example.com")
 

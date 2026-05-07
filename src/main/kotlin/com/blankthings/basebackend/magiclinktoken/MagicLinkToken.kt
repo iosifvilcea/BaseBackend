@@ -23,21 +23,16 @@ class MagicLinkToken(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mlt_seq")
     @SequenceGenerator(name = "mlt_seq", sequenceName = "mlt_id_seq", allocationSize = 1)
     val id: Long = 0,
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     val user: User,
-
     @Column(nullable = false, unique = true)
     val tokenHash: String,
-
     @NotNull
     val createdAt: Instant = Instant.now(),
-
     @NotNull
     val expiresAt: Instant = Instant.now().plusSeconds(EXPIRATION_TIME_15_MINS_IN_SECONDS),
-
-    private var used: Boolean = false
+    private var used: Boolean = false,
 ) {
     fun copy(
         id: Long = this.id,
@@ -45,20 +40,23 @@ class MagicLinkToken(
         tokenHash: String = this.tokenHash,
         expiresAt: Instant = this.expiresAt,
         createdAt: Instant = this.createdAt,
-        used: Boolean = this.used
-    ): MagicLinkToken {
-        return MagicLinkToken(
+        used: Boolean = this.used,
+    ): MagicLinkToken =
+        MagicLinkToken(
             id = id,
             user = user,
             tokenHash = tokenHash,
             createdAt = createdAt,
             expiresAt = expiresAt,
-            used = used
+            used = used,
         )
+
+    fun markAsUsed() {
+        this.used = true
     }
 
-    fun markAsUsed() { this.used = true }
     fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
+
     fun isValid(): Boolean = !used && !isExpired()
 
     override fun equals(other: Any?): Boolean {

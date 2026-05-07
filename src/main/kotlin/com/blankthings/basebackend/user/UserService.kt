@@ -16,13 +16,16 @@ class UserService(
     private val emailService: EmailService,
     private val jwtService: JwtService,
     private val jwtRefreshTokenService: RefreshTokenService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     fun processEmail(email: String): Session =
         findOrCreateUser(email).let { user ->
             when (val linkToken = magicLinkTokenService.upsertToken(user)) {
                 TokenStatus.Existing -> { /* No-op. */ }
-                is TokenStatus.New -> emailService.sendAuthEmail(user.email, linkToken.token)
+
+                is TokenStatus.New -> {
+                    emailService.sendAuthEmail(user.email, linkToken.token)
+                }
             }
             Data() // TODO - I don't like this.
         }
@@ -31,34 +34,47 @@ class UserService(
 
     private fun createNewUser(email: String): User = userRepository.save(User(email = email))
 
-    fun authenticate(token: String): Session =
-        magicLinkTokenService.validate(token).let(::issueSession)
+    fun authenticate(token: String): Session = magicLinkTokenService.validate(token).let(::issueSession)
 
-    fun refreshSession(rawRefreshToken: String): Session =
-        jwtRefreshTokenService.validate(rawRefreshToken).let(::issueSession)
+    fun refreshSession(rawRefreshToken: String): Session = jwtRefreshTokenService.validate(rawRefreshToken).let(::issueSession)
 
     private fun issueSession(result: Result): Session =
         when (result) {
-            Result.None -> Session.None
-            is Result.Data -> Data(
-                accessToken = jwtService.generateAccessToken(result.user),
-                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(result.user)
-            )
+            Result.None -> {
+                Session.None
+            }
+
+            is Result.Data -> {
+                Data(
+                    accessToken = jwtService.generateAccessToken(result.user),
+                    refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(result.user),
+                )
+            }
         }
 
     fun logout(rawRefreshToken: String) =
         when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
-            is Result.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
+            is Result.Data -> {
+                jwtRefreshTokenService.revokeByUserId(data.user.id)
+            }
+
             Result.None -> { /* No-op */ }
         }
 }
 
 sealed class Result {
-    data class Data(val user: User) : Result()
+    data class Data(
+        val user: User,
+    ) : Result()
+
     object None : Result()
 }
 
 sealed class Session {
-    data class Data(val accessToken: String = "", val refreshToken: String = "") : Session()
+    data class Data(
+        val accessToken: String = "",
+        val refreshToken: String = "",
+    ) : Session()
+
     object None : Session()
 }

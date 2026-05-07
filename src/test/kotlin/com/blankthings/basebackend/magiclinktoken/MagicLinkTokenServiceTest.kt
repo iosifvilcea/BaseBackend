@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 class MagicLinkTokenServiceTest {
-
     private val repo = mockk<MagicLinkTokenRepository>()
     private val service = MagicLinkTokenService(repo)
 
@@ -66,11 +65,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `upsertToken returns Existing when a valid token already exists`() {
-        val validToken = MagicLinkToken(
-            user = user,
-            tokenHash = "somehash",
-            expiresAt = Instant.now().plusSeconds(900)
-        )
+        val validToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = "somehash",
+                expiresAt = Instant.now().plusSeconds(900),
+            )
         every { repo.findByUserId(user.id) } returns validToken
 
         val result = service.upsertToken(user)
@@ -80,11 +80,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `upsertToken does not save when a valid token already exists`() {
-        val validToken = MagicLinkToken(
-            user = user,
-            tokenHash = "somehash",
-            expiresAt = Instant.now().plusSeconds(900)
-        )
+        val validToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = "somehash",
+                expiresAt = Instant.now().plusSeconds(900),
+            )
         every { repo.findByUserId(user.id) } returns validToken
 
         service.upsertToken(user)
@@ -94,11 +95,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `upsertToken refreshes and returns New when existing token is expired`() {
-        val expiredToken = MagicLinkToken(
-            user = user,
-            tokenHash = "oldhash",
-            expiresAt = Instant.now().minusSeconds(1)
-        )
+        val expiredToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = "oldhash",
+                expiresAt = Instant.now().minusSeconds(1),
+            )
         every { repo.findByUserId(user.id) } returns expiredToken
 
         val result = service.upsertToken(user)
@@ -109,12 +111,13 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `upsertToken refreshes and returns New when existing token is already used`() {
-        val usedToken = MagicLinkToken(
-            user = user,
-            tokenHash = "usedhash",
-            expiresAt = Instant.now().plusSeconds(900),
-            used = true
-        )
+        val usedToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = "usedhash",
+                expiresAt = Instant.now().plusSeconds(900),
+                used = true,
+            )
         every { repo.findByUserId(user.id) } returns usedToken
 
         val result = service.upsertToken(user)
@@ -136,11 +139,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `validate returns None when token is expired`() {
-        val expiredToken = MagicLinkToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().minusSeconds(1)
-        )
+        val expiredToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().minusSeconds(1),
+            )
         every { repo.findByTokenHash(any()) } returns expiredToken
 
         val result = service.validate("rawtoken")
@@ -150,12 +154,13 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `validate returns None when token is already used`() {
-        val usedToken = MagicLinkToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().plusSeconds(900),
-            used = true
-        )
+        val usedToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().plusSeconds(900),
+                used = true,
+            )
         every { repo.findByTokenHash(any()) } returns usedToken
 
         val result = service.validate("rawtoken")
@@ -165,11 +170,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `validate returns SessionResult Data with user when token is valid`() {
-        val validToken = MagicLinkToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().plusSeconds(900)
-        )
+        val validToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().plusSeconds(900),
+            )
         every { repo.findByTokenHash(any()) } returns validToken
 
         val result = service.validate("rawtoken")
@@ -180,11 +186,12 @@ class MagicLinkTokenServiceTest {
 
     @Test
     fun `validate marks the token as used and saves it`() {
-        val validToken = MagicLinkToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().plusSeconds(900)
-        )
+        val validToken =
+            MagicLinkToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().plusSeconds(900),
+            )
         every { repo.findByTokenHash(any()) } returns validToken
 
         service.validate("rawtoken")

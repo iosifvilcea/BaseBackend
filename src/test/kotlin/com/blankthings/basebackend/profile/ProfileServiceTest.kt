@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.util.Optional
 
 class ProfileServiceTest {
-
     private val repo = mockk<ProfileRepository>()
     private val service = ProfileService(repo)
 

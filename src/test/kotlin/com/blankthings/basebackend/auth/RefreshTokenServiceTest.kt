@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 class RefreshTokenServiceTest {
-
     private val repo = mockk<RefreshTokenRepository>()
     private val expirationDays = 30L
     private val service = RefreshTokenService(repo, expirationDays)
@@ -67,11 +66,12 @@ class RefreshTokenServiceTest {
 
     @Test
     fun `createOrRotateRefreshToken rotates existing token instead of creating a new one`() {
-        val existingToken = RefreshToken(
-            user = user,
-            tokenHash = "oldhash",
-            expiresAt = Instant.now().plusSeconds(3600)
-        )
+        val existingToken =
+            RefreshToken(
+                user = user,
+                tokenHash = "oldhash",
+                expiresAt = Instant.now().plusSeconds(3600),
+            )
         every { repo.findByUserId(user.id) } returns existingToken
         val savedSlot = slot<RefreshToken>()
         every { repo.save(capture(savedSlot)) } answers { firstArg() }
@@ -106,11 +106,12 @@ class RefreshTokenServiceTest {
 
     @Test
     fun `validate returns None when token is expired`() {
-        val expiredToken = RefreshToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().minusSeconds(1)
-        )
+        val expiredToken =
+            RefreshToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().minusSeconds(1),
+            )
         every { repo.findByTokenHash(any()) } returns expiredToken
 
         val result = service.validate("rawtoken")
@@ -120,11 +121,12 @@ class RefreshTokenServiceTest {
 
     @Test
     fun `validate returns SessionResult Data with user for a valid token`() {
-        val validToken = RefreshToken(
-            user = user,
-            tokenHash = Utils.hashToken("rawtoken"),
-            expiresAt = Instant.now().plusSeconds(3600)
-        )
+        val validToken =
+            RefreshToken(
+                user = user,
+                tokenHash = Utils.hashToken("rawtoken"),
+                expiresAt = Instant.now().plusSeconds(3600),
+            )
         every { repo.findByTokenHash(any()) } returns validToken
 
         val result = service.validate("rawtoken")
