@@ -3,20 +3,30 @@ package com.blankthings.basebackend.profile
 import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
+import com.blankthings.basebackend.auth.SecurityConfig
 import com.blankthings.basebackend.user.UserRepository
 import com.blankthings.basebackend.user.UserService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 
 @WebMvcTest(ProfileController::class)
+@Import(SecurityConfig::class)
 class ProfileControllerTest {
     @Autowired
+    private lateinit var context: WebApplicationContext
+
     private lateinit var mockMvc: MockMvc
 
     @MockitoBean
@@ -36,6 +46,15 @@ class ProfileControllerTest {
 
     @MockitoBean
     private lateinit var analyticsTracker: AnalyticsTracker
+
+    @BeforeEach
+    fun setup() {
+        mockMvc =
+            MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply<DefaultMockMvcBuilder>(springSecurity())
+                .build()
+    }
 
     private val profile = Profile(id = 1L, email = "user@example.com")
 
