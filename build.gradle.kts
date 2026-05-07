@@ -28,6 +28,7 @@ repositories {
 
 dependencies {
     implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.jpa)
@@ -38,6 +39,7 @@ dependencies {
     runtimeOnly(libs.jwt.jjwt.impl)
     runtimeOnly(libs.jwt.jjwt.jackson)
 
+    runtimeOnly(libs.micrometer.registry.prometheus)
     runtimeOnly(libs.postgresql)
     developmentOnly(libs.spring.boot.devtools)
 
