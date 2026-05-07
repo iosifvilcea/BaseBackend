@@ -1,6 +1,10 @@
 src/main/resources/env.properties
 
 .claude
+.agents
+package-lock.json
+skills-lock.json
+
 HELP.md
 .gradle
 build/
