@@ -15,7 +15,8 @@ import javax.crypto.SecretKey
 @Service
 class JwtService(
     @Value("\${jwt.secret}") private val secret: String,
-    @Value("\${jwt.expiration-ms}") private val expirationMs: Long
+    @Value("\${jwt.expiration-ms}") private val expirationMs: Long,
+    private val analyticsTracker: AnalyticsTracker
 ) {
     fun generateAccessToken(user: User): String =
         Jwts.builder()
@@ -37,7 +38,7 @@ class JwtService(
                 .subject
                 .toLongOrNull()
         } catch (e: JwtException) {
-            AnalyticsTracker.track(AnalyticsEvent.AUTH_ERROR, "Error parsing JWT Token.", e)
+            analyticsTracker.track(AnalyticsEvent.AUTH_ERROR, "Error parsing JWT Token.", e)
             null
         }
 

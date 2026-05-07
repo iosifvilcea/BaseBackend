@@ -20,7 +20,8 @@ private const val PATH_API_LOGOUT = "/api/auth/logout"
 @Component
 class JwtAuthenticationFilter(
     private val jwtService: JwtService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -31,7 +32,7 @@ class JwtAuthenticationFilter(
         try {
             authenticate(request)
         } catch (e: Exception) {
-            AnalyticsTracker.track(AnalyticsEvent.AUTH_ERROR, "Error authenticating cookies.", e)
+            analyticsTracker.track(AnalyticsEvent.AUTH_ERROR, "Error authenticating cookies.", e)
             SecurityContextHolder.clearContext()
         } finally {
             chain.doFilter(request, response)

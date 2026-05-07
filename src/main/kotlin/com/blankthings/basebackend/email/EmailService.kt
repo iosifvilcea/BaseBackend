@@ -12,7 +12,10 @@ const val EMAIL_SUBJECT = "Login link for blankthings.com"
 const val EMAIL_MESSAGE = "Here's your login for blankthings.com:\n\n %s/api/auth?token="
 
 @Service
-class EmailService(private val mailSender: JavaMailSender) {
+class EmailService(
+    private val mailSender: JavaMailSender,
+    private val analyticsTracker: AnalyticsTracker
+) {
 
     @Value("\${app.url}")
     lateinit var url: String
@@ -27,6 +30,6 @@ class EmailService(private val mailSender: JavaMailSender) {
         }
 
         mailSender.send(message)
-        AnalyticsTracker.track(AnalyticsEvent.EMAIL_SENT, "SENDING $email with token: $token")
+        analyticsTracker.track(AnalyticsEvent.EMAIL_SENT, "SENDING $normalizedEmail")
     }
 }
