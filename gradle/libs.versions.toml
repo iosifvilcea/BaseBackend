@@ -4,6 +4,7 @@ kotlin = "2.2.21"
 mockk = "1.13.14"
 spring-boot = "4.0.0"
 spring-dependency-management = "1.1.7"
+spotless = "8.4.0"
 
 [libraries]
 jwt-jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "json-web-token" }
@@ -38,3 +39,4 @@ kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotl
 kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
