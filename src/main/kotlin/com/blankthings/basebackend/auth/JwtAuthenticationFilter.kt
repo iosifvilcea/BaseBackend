@@ -12,10 +12,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-private const val PATH_API_AUTH = "/api/auth"
-private const val PATH_API_REFRESH = "/api/auth/refresh"
-private const val PATH_API_LOGOUT = "/api/auth/logout"
-
 
 @Component
 class JwtAuthenticationFilter(
@@ -54,9 +50,9 @@ class JwtAuthenticationFilter(
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         // Skip JWT check for public endpoints to avoid unnecessary DB hits
         return when (request.servletPath) {
-            PATH_API_AUTH,
-            PATH_API_REFRESH,
-            PATH_API_LOGOUT -> true
+            AUTH_URL_PATH,
+            AUTH_REFRESH_PATH,
+            AUTH_LOGOUT_PATH -> true
             else -> false
         }
     }

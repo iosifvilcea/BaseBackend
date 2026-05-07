@@ -1,6 +1,5 @@
 package com.blankthings.basebackend.auth
 
-import com.blankthings.basebackend.user.AUTH_URL_PATH
 import com.blankthings.basebackend.user.UserService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -38,12 +37,12 @@ class SecurityConfig(
                 auth
                     .requestMatchers(HttpMethod.POST, AUTH_URL_PATH).permitAll()
                     .requestMatchers(HttpMethod.GET, AUTH_URL_PATH).permitAll()
-                    .requestMatchers(HttpMethod.POST, "$AUTH_URL_PATH/refresh").permitAll()
+                    .requestMatchers(HttpMethod.POST, AUTH_REFRESH_PATH).permitAll()
                     .anyRequest().authenticated()
             }
             .logout { logout ->
                 logout
-                    .logoutUrl("$AUTH_URL_PATH/logout")
+                    .logoutUrl(AUTH_LOGOUT_PATH)
                     .addLogoutHandler(::clearAuthCookies)
                     .logoutSuccessHandler { _, response, _ -> response.status = HttpStatus.OK.value() }
             }

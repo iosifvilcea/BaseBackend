@@ -1,13 +1,12 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.auth.AUTH_URL_PATH
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.REFRESH_TOKEN
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-
-const val AUTH_URL_PATH = "/api/auth"
 
 @RestController
 @RequestMapping(AUTH_URL_PATH)
