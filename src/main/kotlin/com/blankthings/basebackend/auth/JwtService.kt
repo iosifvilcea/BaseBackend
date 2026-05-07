@@ -3,14 +3,13 @@ package com.blankthings.basebackend.auth
 import com.blankthings.basebackend.analytics.AnalyticsEvent
 import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.user.User
-import com.blankthings.basebackend.user.toUserDto
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.util.Date
+import java.util.*
 import javax.crypto.SecretKey
 
 @Service
