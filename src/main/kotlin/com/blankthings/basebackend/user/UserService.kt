@@ -21,7 +21,7 @@ class UserService(
     fun processEmail(email: String): Session =
         findOrCreateUser(email).let { user ->
             when (val linkToken = magicLinkTokenService.upsertToken(user)) {
-                TokenStatus.Existing -> { /** No-op. */ }
+                TokenStatus.Existing -> { /* No-op. */ }
                 is TokenStatus.New -> emailService.sendAuthEmail(user.email, linkToken.token)
             }
             Data() // TODO - I don't like this.
@@ -49,7 +49,7 @@ class UserService(
     fun logout(rawRefreshToken: String) =
         when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
             is Result.Data -> jwtRefreshTokenService.revokeByUserId(data.user.id)
-            Result.None -> { /** No-op */ }
+            Result.None -> { /* No-op */ }
         }
 }
 
