@@ -106,7 +106,7 @@ class UserServiceTest {
 
         val result = service.authenticate("badtoken")
 
-        assertEquals(Session.Failed, result)
+        assertEquals(Session.None, result)
     }
 
     // --- refreshSession ---
@@ -131,7 +131,7 @@ class UserServiceTest {
 
         val result = service.refreshSession("badrefresh")
 
-        assertEquals(Session.Failed, result)
+        assertEquals(Session.None, result)
     }
 
     // --- logout ---

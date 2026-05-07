@@ -1,8 +1,8 @@
 package com.blankthings.basebackend.profile
 
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
-import com.blankthings.basebackend.profile.ProfileNotFoundException
 import com.blankthings.basebackend.user.UserRepository
 import com.blankthings.basebackend.user.UserService
 import org.junit.jupiter.api.Test
@@ -33,6 +33,9 @@ class ProfileControllerTest {
 
     @MockitoBean
     private lateinit var userRepository: UserRepository
+
+    @MockitoBean
+    private lateinit var analyticsTracker: AnalyticsTracker
 
     private val profile = Profile(id = 1L, email = "user@example.com")
 

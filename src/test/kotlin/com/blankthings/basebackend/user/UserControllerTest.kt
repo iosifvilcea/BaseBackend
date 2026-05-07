@@ -1,12 +1,13 @@
 package com.blankthings.basebackend.user
 
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.auth.ACCESS_TOKEN
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
 import com.blankthings.basebackend.auth.REFRESH_TOKEN
 import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -35,11 +36,14 @@ class UserControllerTest {
     @MockitoBean
     private lateinit var userRepository: UserRepository
 
+    @MockitoBean
+    private lateinit var analyticsTracker: AnalyticsTracker
+
     private fun stubAuthCookies() {
-        given(cookieManager.accessCookie(any())).willReturn(
+        given(cookieManager.accessCookie(anyString())).willReturn(
             ResponseCookie.from(ACCESS_TOKEN, "access-token").build(),
         )
-        given(cookieManager.refreshCookie(any())).willReturn(
+        given(cookieManager.refreshCookie(anyString())).willReturn(
             ResponseCookie.from(REFRESH_TOKEN, "refresh-token").build(),
         )
     }
@@ -48,7 +52,7 @@ class UserControllerTest {
 
     @Test
     fun `POST login returns 200 with success message when email is processed`() {
-        given(userService.processEmail(any())).willReturn(Session.Data())
+        given(userService.processEmail(anyString())).willReturn(Session.Data())
 
         mockMvc
             .post("/api/auth") {
@@ -62,7 +66,7 @@ class UserControllerTest {
 
     @Test
     fun `POST login returns 200 when processEmail returns Failed`() {
-        given(userService.processEmail(any())).willReturn(Session.Failed)
+        given(userService.processEmail(anyString())).willReturn(Session.None)
 
         mockMvc
             .post("/api/auth") {
@@ -101,7 +105,7 @@ class UserControllerTest {
 
     @Test
     fun `GET authenticate returns 401 when token is invalid`() {
-        given(userService.authenticate("badtoken")).willReturn(Session.Failed)
+        given(userService.authenticate("badtoken")).willReturn(Session.None)
 
         mockMvc
             .get("/api/auth") {
@@ -143,7 +147,7 @@ class UserControllerTest {
 
     @Test
     fun `POST refresh returns 401 when refresh token is invalid`() {
-        given(userService.refreshSession("badrefresh")).willReturn(Session.Failed)
+        given(userService.refreshSession("badrefresh")).willReturn(Session.None)
 
         mockMvc
             .post("/api/auth/refresh") {

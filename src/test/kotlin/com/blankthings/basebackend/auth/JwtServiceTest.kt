@@ -1,6 +1,8 @@
 package com.blankthings.basebackend.auth
 
+import com.blankthings.basebackend.analytics.AnalyticsTracker
 import com.blankthings.basebackend.user.User
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -10,8 +12,9 @@ class JwtServiceTest {
     // 32-byte key (256-bit) — minimum required for HMAC-SHA256
     private val testSecret = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
     private val oneHourMs = 3_600_000L
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
 
-    private val jwtService = JwtService(secret = testSecret, expirationMs = oneHourMs)
+    private val jwtService = JwtService(secret = testSecret, expirationMs = oneHourMs, analyticsTracker = analyticsTracker)
 
     private val testUser = User(id = 42L, email = "test@example.com")
 
@@ -36,7 +39,7 @@ class JwtServiceTest {
 
     @Test
     fun `validateToken returns null for an expired token`() {
-        val expiredJwtService = JwtService(secret = testSecret, expirationMs = -3_600_000L)
+        val expiredJwtService = JwtService(secret = testSecret, expirationMs = -3_600_000L, analyticsTracker = analyticsTracker)
         val token = expiredJwtService.generateAccessToken(testUser)
         assertNull(jwtService.validateToken(token))
     }
