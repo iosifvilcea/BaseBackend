@@ -1,6 +1,6 @@
 package com.blankthings.basebackend.profile
 
-import com.blankthings.basebackend.UserNotFoundException
+import com.blankthings.basebackend.profile.ProfileNotFoundException
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
 import com.blankthings.basebackend.user.UserRepository
@@ -84,7 +84,7 @@ class ProfileControllerTest {
     @Test
     @WithMockUser
     fun `GET findById returns 404 when not found`() {
-        given(profileService.findById(99L)).willThrow(UserNotFoundException("id: 99"))
+        given(profileService.findById(99L)).willThrow(ProfileNotFoundException(99L))
 
         mockMvc.get("/api/profile/id/99").andExpect {
             status { isNotFound() }

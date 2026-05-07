@@ -1,6 +1,5 @@
 package com.blankthings.basebackend.profile
 
-import com.blankthings.basebackend.UserNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,5 +13,5 @@ class ProfileService(
     fun findById(id: Long): Profile =
         profileRepository
             .findById(id)
-            .orElseThrow { UserNotFoundException("id: $id") }
+            .orElseThrow { ProfileNotFoundException(id) }
 }

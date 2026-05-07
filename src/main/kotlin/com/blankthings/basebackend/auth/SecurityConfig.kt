@@ -28,8 +28,8 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .exceptionHandling {
-                it.authenticationEntryPoint { _, response, exception ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.message)
+                it.authenticationEntryPoint { _, response, _ ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required")
                 }
             }.authorizeHttpRequests { auth ->
                 auth

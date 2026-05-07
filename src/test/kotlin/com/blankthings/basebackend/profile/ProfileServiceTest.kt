@@ -46,10 +46,10 @@ class ProfileServiceTest {
     }
 
     @Test
-    fun `findById throws UserNotFoundException when not found`() {
+    fun `findById throws ProfileNotFoundException when not found`() {
         every { repo.findById(any()) } returns Optional.empty()
 
-        assertThrows(com.blankthings.basebackend.UserNotFoundException::class.java) {
+        assertThrows(ProfileNotFoundException::class.java) {
             service.findById(99L)
         }
     }

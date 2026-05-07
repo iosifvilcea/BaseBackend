@@ -1,34 +1,28 @@
 package com.blankthings.basebackend
 
+import com.blankthings.basebackend.profile.ProfileNotFoundException
+import com.blankthings.basebackend.user.UserNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.core.AuthenticationException
-import org.springframework.web.ErrorResponseException
-import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
 
-@ControllerAdvice
+@RestControllerAdvice
 class GlobalExceptionHandler {
-    @ExceptionHandler(AuthenticationException::class)
-    fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<String> =
-        ResponseEntity(ex.message ?: "Unauthorized", HttpStatus.UNAUTHORIZED)
-
-    @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<String> =
-        ResponseEntity(ex.message ?: "Forbidden", HttpStatus.FORBIDDEN)
+    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(UserNotFoundException::class)
-    fun handleUserNotFoundException(exception: UserNotFoundException): ResponseEntity<ErrorResponseException> =
-        ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(ErrorResponseException(HttpStatus.NOT_FOUND, exception))
+    fun handleUserNotFoundException(ex: UserNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "User not found")
+
+    @ExceptionHandler(ProfileNotFoundException::class)
+    fun handleProfileNotFoundException(ex: ProfileNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Profile not found")
 
     @ExceptionHandler(Exception::class)
-    fun handleGeneralException(ex: Exception): ResponseEntity<String> =
-        ResponseEntity(ex.message ?: "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleGeneralException(ex: Exception): ProblemDetail {
+        logger.error("Unhandled exception", ex)
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred")
+    }
 }
-
-class UserNotFoundException(
-    email: String,
-) : RuntimeException("User not found: $email")
