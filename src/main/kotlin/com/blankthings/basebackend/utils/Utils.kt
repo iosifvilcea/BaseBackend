@@ -13,9 +13,9 @@ object Utils {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 
-    fun hashToken(token: String): String {
-        return MessageDigest.getInstance("SHA-256")
+    fun hashToken(token: String): String =
+        MessageDigest
+            .getInstance("SHA-256")
             .digest(token.toByteArray())
             .joinToString("") { "%02x".format(it) }
-    }
 }

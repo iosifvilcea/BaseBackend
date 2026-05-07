@@ -12,18 +12,16 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-
 @Component
 class JwtAuthenticationFilter(
     private val jwtService: JwtService,
     private val userRepository: UserRepository,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
 ) : OncePerRequestFilter() {
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         try {
             authenticate(request)
@@ -37,7 +35,8 @@ class JwtAuthenticationFilter(
 
     private fun authenticate(request: HttpServletRequest) {
         request.cookies
-            ?.find { it.name == ACCESS_TOKEN }?.value
+            ?.find { it.name == ACCESS_TOKEN }
+            ?.value
             ?.let { jwtService.validateToken(it) }
             ?.let { userId -> userRepository.findById(userId).orElse(null) }
             ?.let { user ->
@@ -52,7 +51,9 @@ class JwtAuthenticationFilter(
         return when (request.servletPath) {
             AUTH_URL_PATH,
             AUTH_REFRESH_PATH,
-            AUTH_LOGOUT_PATH -> true
+            AUTH_LOGOUT_PATH,
+            -> true
+
             else -> false
         }
     }

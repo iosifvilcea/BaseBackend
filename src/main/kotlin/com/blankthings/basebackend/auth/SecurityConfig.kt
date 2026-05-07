@@ -20,9 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val userService: UserService,
-    private val cookieManager: CookieManager
+    private val cookieManager: CookieManager,
 ) {
-
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
@@ -32,24 +31,29 @@ class SecurityConfig(
                 it.authenticationEntryPoint { _, response, exception ->
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.message)
                 }
-            }
-            .authorizeHttpRequests { auth ->
+            }.authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(HttpMethod.POST, AUTH_URL_PATH).permitAll()
-                    .requestMatchers(HttpMethod.GET, AUTH_URL_PATH).permitAll()
-                    .requestMatchers(HttpMethod.POST, AUTH_REFRESH_PATH).permitAll()
-                    .anyRequest().authenticated()
-            }
-            .logout { logout ->
+                    .requestMatchers(HttpMethod.POST, AUTH_URL_PATH)
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, AUTH_URL_PATH)
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, AUTH_REFRESH_PATH)
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.logout { logout ->
                 logout
                     .logoutUrl(AUTH_LOGOUT_PATH)
                     .addLogoutHandler(::clearAuthCookies)
                     .logoutSuccessHandler { _, response, _ -> response.status = HttpStatus.OK.value() }
-            }
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .build()
 
-    private fun clearAuthCookies(request: HttpServletRequest, response: HttpServletResponse, auth: Authentication?) {
+    private fun clearAuthCookies(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        auth: Authentication?,
+    ) {
         request.cookies
             ?.find { it.name == REFRESH_TOKEN }
             ?.value

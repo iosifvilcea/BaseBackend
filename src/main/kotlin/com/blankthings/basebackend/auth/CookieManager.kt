@@ -12,10 +12,11 @@ const val ACCESS_TOKEN = "access_token"
 class CookieManager(
     @Value("\${jwt.expiration-ms}") private val jwtExpirationMs: Long,
     @Value("\${jwt.refresh-token-expiration-days}") private val refreshExpirationDays: Long,
-    @Value("\${app.cookie.secure}") private val cookieSecure: Boolean
+    @Value("\${app.cookie.secure}") private val cookieSecure: Boolean,
 ) {
     fun accessCookie(token: String): ResponseCookie =
-        ResponseCookie.from(ACCESS_TOKEN, token)
+        ResponseCookie
+            .from(ACCESS_TOKEN, token)
             .httpOnly(true)
             .secure(cookieSecure)
             .path("/")
@@ -24,7 +25,8 @@ class CookieManager(
             .build()
 
     fun refreshCookie(token: String): ResponseCookie =
-        ResponseCookie.from(REFRESH_TOKEN, token)
+        ResponseCookie
+            .from(REFRESH_TOKEN, token)
             .httpOnly(true)
             .secure(cookieSecure)
             .path(AUTH_URL_PATH)
@@ -32,8 +34,12 @@ class CookieManager(
             .sameSite("Strict")
             .build()
 
-    fun clearCookie(name: String, path: String): ResponseCookie =
-        ResponseCookie.from(name, "")
+    fun clearCookie(
+        name: String,
+        path: String,
+    ): ResponseCookie =
+        ResponseCookie
+            .from(name, "")
             .httpOnly(true)
             .secure(cookieSecure)
             .path(path)

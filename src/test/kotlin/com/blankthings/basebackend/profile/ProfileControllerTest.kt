@@ -1,10 +1,10 @@
 package com.blankthings.basebackend.profile
 
+import com.blankthings.basebackend.UserNotFoundException
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.JwtService
 import com.blankthings.basebackend.user.UserRepository
 import com.blankthings.basebackend.user.UserService
-import com.blankthings.basebackend.UserNotFoundException
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.get
 
 @WebMvcTest(ProfileController::class)
 class ProfileControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 

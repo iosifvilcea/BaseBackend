@@ -12,32 +12,36 @@ import java.time.Instant
 @Transactional
 class RefreshTokenService(
     private val refreshTokenRepository: RefreshTokenRepository,
-    @Value("\${jwt.refresh-token-expiration-days}") private val expirationDays: Long
+    @Value("\${jwt.refresh-token-expiration-days}") private val expirationDays: Long,
 ) {
-
     fun createOrRotateRefreshToken(user: User): String {
         val rawToken = Utils.generateSecureToken()
-        val token = findOrCreateRefreshToken(
-            user,
-            Utils.hashToken(rawToken),
-            Instant.now().plusSeconds(expirationDays * 24 * 3600)
-        )
+        val token =
+            findOrCreateRefreshToken(
+                user,
+                Utils.hashToken(rawToken),
+                Instant.now().plusSeconds(expirationDays * 24 * 3600),
+            )
         refreshTokenRepository.save(token)
         return rawToken
     }
 
-    private fun findOrCreateRefreshToken(user: User, hashToken: String, expiresAt: Instant) =
-        refreshTokenRepository.findByUserId(user.id)?.apply {
-            this.tokenHash = hashToken
-            this.expiresAt = expiresAt
-        } ?: RefreshToken(
-            user = user,
-            tokenHash = hashToken,
-            expiresAt = expiresAt
-        )
+    private fun findOrCreateRefreshToken(
+        user: User,
+        hashToken: String,
+        expiresAt: Instant,
+    ) = refreshTokenRepository.findByUserId(user.id)?.apply {
+        this.tokenHash = hashToken
+        this.expiresAt = expiresAt
+    } ?: RefreshToken(
+        user = user,
+        tokenHash = hashToken,
+        expiresAt = expiresAt,
+    )
 
     fun validate(rawToken: String): Result =
-        Utils.hashToken(rawToken)
+        Utils
+            .hashToken(rawToken)
             .let { refreshTokenRepository.findByTokenHash(it) }
             ?.takeIf { !it.isExpired() }
             ?.let { Result.Data(user = it.user) }

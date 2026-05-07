@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
 class GlobalExceptionHandler {
-
     @ExceptionHandler(AuthenticationException::class)
     fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<String> =
         ResponseEntity(ex.message ?: "Unauthorized", HttpStatus.UNAUTHORIZED)
@@ -30,4 +29,6 @@ class GlobalExceptionHandler {
         ResponseEntity(ex.message ?: "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
 }
 
-class UserNotFoundException(email: String) : RuntimeException("User not found: $email")
+class UserNotFoundException(
+    email: String,
+) : RuntimeException("User not found: $email")

@@ -20,15 +20,12 @@ class User(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_id_seq", allocationSize = 1)
     val id: Long = 0,
-
     @Column(unique = true, nullable = false)
     val email: String,
-
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     val refreshTokens: MutableList<RefreshToken> = mutableListOf(),
-
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val magicLinkToken: MagicLinkToken? = null
+    val magicLinkToken: MagicLinkToken? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

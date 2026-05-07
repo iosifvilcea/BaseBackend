@@ -6,8 +6,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class ProfileService(private val profileRepository: ProfileRepository) {
+class ProfileService(
+    private val profileRepository: ProfileRepository,
+) {
     fun findByEmail(email: String): Profile? = profileRepository.findByEmail(email)
-    fun findById(id: Long): Profile = profileRepository.findById(id)
-        .orElseThrow { UserNotFoundException("id: $id") }
+
+    fun findById(id: Long): Profile =
+        profileRepository
+            .findById(id)
+            .orElseThrow { UserNotFoundException("id: $id") }
 }

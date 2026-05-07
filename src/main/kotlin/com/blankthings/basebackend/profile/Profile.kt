@@ -13,9 +13,8 @@ class Profile(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0,
-
     @Column(nullable = false, unique = true)
-    val email: String
+    val email: String,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

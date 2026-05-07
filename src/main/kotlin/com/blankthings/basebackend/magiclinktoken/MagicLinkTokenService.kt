@@ -10,14 +10,13 @@ import java.time.Instant
 @Service
 @Transactional
 class MagicLinkTokenService(
-    private val magicLinkTokenRepository: MagicLinkTokenRepository
+    private val magicLinkTokenRepository: MagicLinkTokenRepository,
 ) {
-
-    fun upsertToken(user: User): TokenStatus {
-        return magicLinkTokenRepository.findByUserId(user.id)
+    fun upsertToken(user: User): TokenStatus =
+        magicLinkTokenRepository
+            .findByUserId(user.id)
             ?.let(::updateCurrentToken)
             ?: refreshToken(MagicLinkToken(user = user, tokenHash = ""))
-    }
 
     private fun updateCurrentToken(token: MagicLinkToken): TokenStatus =
         if (!token.isValid()) {
@@ -28,18 +27,20 @@ class MagicLinkTokenService(
 
     private fun refreshToken(token: MagicLinkToken): TokenStatus {
         val rawToken = Utils.generateSecureToken()
-        val refreshedToken = token.copy(
-            tokenHash = Utils.hashToken(rawToken),
-            expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_15_MINS_IN_SECONDS),
-            createdAt = Instant.now(),
-            used = false
-        )
+        val refreshedToken =
+            token.copy(
+                tokenHash = Utils.hashToken(rawToken),
+                expiresAt = Instant.now().plusSeconds(EXPIRATION_TIME_15_MINS_IN_SECONDS),
+                createdAt = Instant.now(),
+                used = false,
+            )
         magicLinkTokenRepository.save(refreshedToken)
         return TokenStatus.New(rawToken)
     }
 
     fun validate(receivedToken: String): Result =
-        Utils.hashToken(receivedToken)
+        Utils
+            .hashToken(receivedToken)
             .let { magicLinkTokenRepository.findByTokenHash(it) }
             ?.takeIf {
                 it.isValid()
@@ -52,6 +53,9 @@ class MagicLinkTokenService(
 }
 
 sealed class TokenStatus {
-    data class New(val token: String): TokenStatus()
-    object Existing: TokenStatus()
+    data class New(
+        val token: String,
+    ) : TokenStatus()
+
+    object Existing : TokenStatus()
 }

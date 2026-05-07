@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
@@ -16,11 +17,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 
 @WebMvcTest(UserController::class)
 class UserControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -38,10 +37,10 @@ class UserControllerTest {
 
     private fun stubAuthCookies() {
         given(cookieManager.accessCookie(any())).willReturn(
-            ResponseCookie.from(ACCESS_TOKEN, "access-token").build()
+            ResponseCookie.from(ACCESS_TOKEN, "access-token").build(),
         )
         given(cookieManager.refreshCookie(any())).willReturn(
-            ResponseCookie.from(REFRESH_TOKEN, "refresh-token").build()
+            ResponseCookie.from(REFRESH_TOKEN, "refresh-token").build(),
         )
     }
 
@@ -51,34 +50,37 @@ class UserControllerTest {
     fun `POST login returns 200 with success message when email is processed`() {
         given(userService.processEmail(any())).willReturn(Session.Data())
 
-        mockMvc.post("/api/auth") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"email": "user@example.com"}"""
-        }.andExpect {
-            status { isOk() }
-            jsonPath("$.successMessage") { exists() }
-        }
+        mockMvc
+            .post("/api/auth") {
+                contentType = MediaType.APPLICATION_JSON
+                content = """{"email": "user@example.com"}"""
+            }.andExpect {
+                status { isOk() }
+                jsonPath("$.successMessage") { exists() }
+            }
     }
 
     @Test
     fun `POST login returns 200 when processEmail returns Failed`() {
         given(userService.processEmail(any())).willReturn(Session.Failed)
 
-        mockMvc.post("/api/auth") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"email": "user@example.com"}"""
-        }.andExpect {
-            status { isOk() }
-        }
+        mockMvc
+            .post("/api/auth") {
+                contentType = MediaType.APPLICATION_JSON
+                content = """{"email": "user@example.com"}"""
+            }.andExpect {
+                status { isOk() }
+            }
     }
 
     @Test
     fun `POST login returns 400 when request body is missing`() {
-        mockMvc.post("/api/auth") {
-            contentType = MediaType.APPLICATION_JSON
-        }.andExpect {
-            status { isBadRequest() }
-        }
+        mockMvc
+            .post("/api/auth") {
+                contentType = MediaType.APPLICATION_JSON
+            }.andExpect {
+                status { isBadRequest() }
+            }
     }
 
     // --- GET /api/auth?token=... ---
@@ -88,23 +90,25 @@ class UserControllerTest {
         given(userService.authenticate("validtoken")).willReturn(Session.Data("access", "refresh"))
         stubAuthCookies()
 
-        mockMvc.get("/api/auth") {
-            param("token", "validtoken")
-        }.andExpect {
-            status { isOk() }
-            header { exists(HttpHeaders.SET_COOKIE) }
-        }
+        mockMvc
+            .get("/api/auth") {
+                param("token", "validtoken")
+            }.andExpect {
+                status { isOk() }
+                header { exists(HttpHeaders.SET_COOKIE) }
+            }
     }
 
     @Test
     fun `GET authenticate returns 401 when token is invalid`() {
         given(userService.authenticate("badtoken")).willReturn(Session.Failed)
 
-        mockMvc.get("/api/auth") {
-            param("token", "badtoken")
-        }.andExpect {
-            status { isUnauthorized() }
-        }
+        mockMvc
+            .get("/api/auth") {
+                param("token", "badtoken")
+            }.andExpect {
+                status { isUnauthorized() }
+            }
     }
 
     @Test
@@ -128,22 +132,24 @@ class UserControllerTest {
         given(userService.refreshSession("rawrefresh")).willReturn(Session.Data("access", "refresh"))
         stubAuthCookies()
 
-        mockMvc.post("/api/auth/refresh") {
-            cookie(Cookie(REFRESH_TOKEN, "rawrefresh"))
-        }.andExpect {
-            status { isOk() }
-            header { exists(HttpHeaders.SET_COOKIE) }
-        }
+        mockMvc
+            .post("/api/auth/refresh") {
+                cookie(Cookie(REFRESH_TOKEN, "rawrefresh"))
+            }.andExpect {
+                status { isOk() }
+                header { exists(HttpHeaders.SET_COOKIE) }
+            }
     }
 
     @Test
     fun `POST refresh returns 401 when refresh token is invalid`() {
         given(userService.refreshSession("badrefresh")).willReturn(Session.Failed)
 
-        mockMvc.post("/api/auth/refresh") {
-            cookie(Cookie(REFRESH_TOKEN, "badrefresh"))
-        }.andExpect {
-            status { isUnauthorized() }
-        }
+        mockMvc
+            .post("/api/auth/refresh") {
+                cookie(Cookie(REFRESH_TOKEN, "badrefresh"))
+            }.andExpect {
+                status { isUnauthorized() }
+            }
     }
 }

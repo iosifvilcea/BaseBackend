@@ -14,20 +14,23 @@ const val EMAIL_MESSAGE = "Here's your login for blankthings.com:\n\n %s/api/aut
 @Service
 class EmailService(
     private val mailSender: JavaMailSender,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
 ) {
-
     @Value("\${app.url}")
     lateinit var url: String
 
-    fun sendAuthEmail(email: String, token: String) {
+    fun sendAuthEmail(
+        email: String,
+        token: String,
+    ) {
         val normalizedEmail = email.trim().lowercase()
-        val message = SimpleMailMessage().apply {
-            setTo(normalizedEmail)
-            from = EMAIL_FROM
-            subject = EMAIL_SUBJECT
-            text = EMAIL_MESSAGE.format(url) + token
-        }
+        val message =
+            SimpleMailMessage().apply {
+                setTo(normalizedEmail)
+                from = EMAIL_FROM
+                subject = EMAIL_SUBJECT
+                text = EMAIL_MESSAGE.format(url) + token
+            }
 
         mailSender.send(message)
         analyticsTracker.track(AnalyticsEvent.EMAIL_SENT, "SENDING $normalizedEmail")
