@@ -3,6 +3,9 @@ package com.blankthings.basebackend.user
 import com.blankthings.basebackend.auth.AUTH_URL_PATH
 import com.blankthings.basebackend.auth.CookieManager
 import com.blankthings.basebackend.auth.REFRESH_TOKEN
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +18,7 @@ class UserController(
     private val cookieManager: CookieManager
 ) {
     @PostMapping
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> =
+    fun login(@RequestBody @Valid loginRequest: LoginRequest): ResponseEntity<LoginResponse> =
         when (userService.processEmail(loginRequest.email)) {
             Session.None -> ResponseEntity.ok(LoginResponse.Failed)
             is Session.Data -> ResponseEntity.ok(LoginResponse.Success())
@@ -42,7 +45,9 @@ class UserController(
         }
 }
 
-data class LoginRequest(val email: String)
+data class LoginRequest(
+    @field:Email @field:NotBlank val email: String
+)
 
 sealed class LoginResponse {
     data class Success(
