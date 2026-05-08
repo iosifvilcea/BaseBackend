@@ -1,6 +1,5 @@
 package com.blankthings.basebackend.auth
 
-import com.blankthings.basebackend.user.Result
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import io.mockk.every
@@ -9,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -96,16 +96,16 @@ class RefreshTokenServiceTest {
     // --- validate ---
 
     @Test
-    fun `validate returns None when token hash is not found`() {
+    fun `validate returns null when token hash is not found`() {
         every { repo.findByTokenHash(any()) } returns null
 
         val result = service.validate("rawtoken")
 
-        assertEquals(Result.None, result)
+        assertNull(result)
     }
 
     @Test
-    fun `validate returns None when token is expired`() {
+    fun `validate returns null when token is expired`() {
         val expiredToken =
             RefreshToken(
                 user = user,
@@ -116,11 +116,11 @@ class RefreshTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(Result.None, result)
+        assertNull(result)
     }
 
     @Test
-    fun `validate returns SessionResult Data with user for a valid token`() {
+    fun `validate returns the user for a valid token`() {
         val validToken =
             RefreshToken(
                 user = user,
@@ -131,8 +131,7 @@ class RefreshTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertTrue(result is Result.Data)
-        assertEquals(user, (result as Result.Data).user)
+        assertEquals(user, result)
     }
 
     @Test

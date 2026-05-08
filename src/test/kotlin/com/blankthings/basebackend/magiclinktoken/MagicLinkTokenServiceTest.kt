@@ -1,6 +1,5 @@
 package com.blankthings.basebackend.magiclinktoken
 
-import com.blankthings.basebackend.user.Result
 import com.blankthings.basebackend.user.User
 import com.blankthings.basebackend.utils.Utils
 import io.mockk.every
@@ -9,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -130,16 +130,16 @@ class MagicLinkTokenServiceTest {
     // --- validate ---
 
     @Test
-    fun `validate returns None when token hash is not found`() {
+    fun `validate returns null when token hash is not found`() {
         every { repo.findByTokenHash(any()) } returns null
 
         val result = service.validate("rawtoken")
 
-        assertEquals(Result.None, result)
+        assertNull(result)
     }
 
     @Test
-    fun `validate returns None when token is expired`() {
+    fun `validate returns null when token is expired`() {
         val expiredToken =
             MagicLinkToken(
                 user = user,
@@ -150,11 +150,11 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(Result.None, result)
+        assertNull(result)
     }
 
     @Test
-    fun `validate returns None when token is already used`() {
+    fun `validate returns null when token is already used`() {
         val usedToken =
             MagicLinkToken(
                 user = user,
@@ -166,11 +166,11 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertEquals(Result.None, result)
+        assertNull(result)
     }
 
     @Test
-    fun `validate returns SessionResult Data with user when token is valid`() {
+    fun `validate returns the user when token is valid`() {
         val validToken =
             MagicLinkToken(
                 user = user,
@@ -181,8 +181,7 @@ class MagicLinkTokenServiceTest {
 
         val result = service.validate("rawtoken")
 
-        assertTrue(result is Result.Data)
-        assertEquals(user, (result as Result.Data).user)
+        assertEquals(user, result)
     }
 
     @Test

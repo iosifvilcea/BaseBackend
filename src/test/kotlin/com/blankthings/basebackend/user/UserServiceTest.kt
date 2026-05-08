@@ -88,7 +88,7 @@ class UserServiceTest {
 
     @Test
     fun `authenticate returns Success with tokens when magic link token is valid`() {
-        every { magicLinkTokenService.validate("rawtoken") } returns Result.Data(user)
+        every { magicLinkTokenService.validate("rawtoken") } returns user
         every { jwtService.generateAccessToken(user) } returns "access-token"
         every { refreshTokenService.createOrRotateRefreshToken(user) } returns "refresh-token"
 
@@ -102,7 +102,7 @@ class UserServiceTest {
 
     @Test
     fun `authenticate returns Failed when magic link token is invalid`() {
-        every { magicLinkTokenService.validate("badtoken") } returns Result.None
+        every { magicLinkTokenService.validate("badtoken") } returns null
 
         val result = service.authenticate("badtoken")
 
@@ -113,7 +113,7 @@ class UserServiceTest {
 
     @Test
     fun `refreshSession returns Success with new tokens when refresh token is valid`() {
-        every { refreshTokenService.validate("rawrefresh") } returns Result.Data(user)
+        every { refreshTokenService.validate("rawrefresh") } returns user
         every { jwtService.generateAccessToken(user) } returns "new-access-token"
         every { refreshTokenService.createOrRotateRefreshToken(user) } returns "new-refresh-token"
 
@@ -127,7 +127,7 @@ class UserServiceTest {
 
     @Test
     fun `refreshSession returns Failed when refresh token is invalid`() {
-        every { refreshTokenService.validate("badrefresh") } returns Result.None
+        every { refreshTokenService.validate("badrefresh") } returns null
 
         val result = service.refreshSession("badrefresh")
 
@@ -138,7 +138,7 @@ class UserServiceTest {
 
     @Test
     fun `logout revokes refresh token when it is valid`() {
-        every { refreshTokenService.validate("rawrefresh") } returns Result.Data(user)
+        every { refreshTokenService.validate("rawrefresh") } returns user
         every { refreshTokenService.revokeByUserId(user.id) } returns Unit
 
         service.logout("rawrefresh")
@@ -148,7 +148,7 @@ class UserServiceTest {
 
     @Test
     fun `logout does nothing when refresh token is invalid`() {
-        every { refreshTokenService.validate("badrefresh") } returns Result.None
+        every { refreshTokenService.validate("badrefresh") } returns null
 
         service.logout("badrefresh")
 

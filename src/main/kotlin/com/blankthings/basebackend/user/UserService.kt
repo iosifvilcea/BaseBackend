@@ -38,36 +38,19 @@ class UserService(
 
     fun refreshSession(rawRefreshToken: String): Session = jwtRefreshTokenService.validate(rawRefreshToken).let(::issueSession)
 
-    private fun issueSession(result: Result): Session =
-        when (result) {
-            Result.None -> {
-                Session.None
-            }
+    private fun issueSession(user: User?): Session =
+        user?.let {
+            Data(
+                accessToken = jwtService.generateAccessToken(it),
+                refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(it),
+            )
+        } ?: Session.None
 
-            is Result.Data -> {
-                Data(
-                    accessToken = jwtService.generateAccessToken(result.user),
-                    refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(result.user),
-                )
-            }
-        }
-
-    fun logout(rawRefreshToken: String) =
-        when (val data = jwtRefreshTokenService.validate(rawRefreshToken)) {
-            is Result.Data -> {
-                jwtRefreshTokenService.revokeByUserId(data.user.id)
-            }
-
-            Result.None -> { /* No-op */ }
-        }
-}
-
-sealed class Result {
-    data class Data(
-        val user: User,
-    ) : Result()
-
-    object None : Result()
+    fun logout(rawRefreshToken: String) {
+        jwtRefreshTokenService
+            .validate(rawRefreshToken)
+            ?.let { jwtRefreshTokenService.revokeByUserId(it.id) }
+    }
 }
 
 sealed class Session {

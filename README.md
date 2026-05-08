@@ -19,14 +19,14 @@ The active profile is set in `application.properties` (`spring.profiles.active=d
 /api/auth
 /api/auth?token=
 /api/auth/refresh
-/api/profile                                                                                         │
+/api/auth/logout
 /api/profile/{email}
-/api/profile/{id}
+/api/profile/id/{id}
 ```
 
 ### Local Development (without Docker)
 
-Create `src/main/resources/env.properties` using the keys defined in `.env.example`, then run:
+Create `src/main/resources/env.properties` using the keys defined in `[your-local-env]`, then run:
 
 ```bash
 ./gradlew bootRun
@@ -37,7 +37,7 @@ The app starts on port `8090`. Actuator endpoints are on `8091`.
 ### Docker (recommended)
 
 ```bash
-cp .env.example .env
+cp [your-local-env] .env
 # fill in values
 docker compose up --build
 ```
@@ -77,7 +77,8 @@ Results are written to `build/reports/tests/test/index.html`.
 #### Libraries
 
 - **JUnit 5** — test runner
-- **MockK** — Kotlin-native mocking (`mockk<T>()`, `every`, `verify`)
+- **MockK** — Kotlin-native mocking for service and unit tests (`mockk<T>()`, `every`, `verify`)
+- **Mockito** — bean mocking for controller slice tests (`@MockitoBean` within `@WebMvcTest`)
 - **MockMvc** — controller-layer slice tests (`@WebMvcTest`)
 - **Spring Security Test** — `@WithMockUser` for authenticated request simulation
 
@@ -89,15 +90,6 @@ Results are written to `build/reports/tests/test/index.html`.
 
 # Auto-format code
 ./gradlew spotlessApply
-
-# Install git hooks to run spotless on pre-commit
-./gradlew installGitHooks
-
-# Run lint on all application modules
-./gradlew aggregatedLintRelease
-
-# Run dependency analysis
-./gradlew buildHealth
 ```
 
 **Note**
