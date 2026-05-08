@@ -1,5 +1,6 @@
 This file provides guidance when working with code in this repository.
 
+
 ## Building
 
 ### Profiles
@@ -63,6 +64,7 @@ java -jar build/libs/BaseBackend-0.0.1-SNAPSHOT.jar \
 | Grafana    | http://localhost:3000          |
 | Loki       | http://localhost:3100          |
 
+
 ## Running Tests
 
 ### Tests
@@ -102,7 +104,7 @@ Results are written to `build/reports/tests/test/index.html`.
 Code Quality must run and pass before commit.
 Tests must run and pass before push.
 
-## Git Hooks
+### Git Hooks
 
 The repo ships with two hooks in `.git/hooks/`. Make them executable once after cloning:
 
@@ -114,6 +116,7 @@ chmod +x .git/hooks/pre-commit .git/hooks/pre-push
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | `pre-commit` | `spotlessCheck` — if formatting fails, runs `spotlessApply` automatically and exits so you can stage the fixes and re-commit |
 | `pre-push`   | `./gradlew test` — runs the full unit test suite before pushing                                                              |
+
 
 ## Architecture Overview
 
@@ -158,6 +161,7 @@ Repositories (UserRepository, ProfileRepository, ...)
 | Testing          | JUnit 5, MockK, MockMvc, Spring Security Test                         |
 | Build            | Gradle (Kotlin DSL) with version catalog                              |
 | Containerisation | Docker Compose — app, PostgreSQL, Prometheus, Loki, Promtail, Grafana |
+
 
 ## Development Guidelines
 
