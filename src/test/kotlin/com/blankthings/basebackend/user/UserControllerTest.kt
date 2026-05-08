@@ -51,9 +51,7 @@ class UserControllerTest {
     // --- POST /api/auth ---
 
     @Test
-    fun `POST login returns 200 with success message when email is processed`() {
-        given(userService.processEmail(anyString())).willReturn(Session.Data())
-
+    fun `POST login returns 200 with success message`() {
         mockMvc
             .post("/api/auth") {
                 contentType = MediaType.APPLICATION_JSON
@@ -61,19 +59,6 @@ class UserControllerTest {
             }.andExpect {
                 status { isOk() }
                 jsonPath("$.successMessage") { exists() }
-            }
-    }
-
-    @Test
-    fun `POST login returns 200 when processEmail returns Failed`() {
-        given(userService.processEmail(anyString())).willReturn(Session.None)
-
-        mockMvc
-            .post("/api/auth") {
-                contentType = MediaType.APPLICATION_JSON
-                content = """{"email": "user@example.com"}"""
-            }.andExpect {
-                status { isOk() }
             }
     }
 

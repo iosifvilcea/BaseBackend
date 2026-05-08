@@ -5,7 +5,6 @@ import com.blankthings.basebackend.auth.RefreshTokenService
 import com.blankthings.basebackend.email.EmailService
 import com.blankthings.basebackend.magiclinktoken.MagicLinkTokenService
 import com.blankthings.basebackend.magiclinktoken.TokenStatus
-import com.blankthings.basebackend.user.Session.Data
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,17 +17,16 @@ class UserService(
     private val jwtRefreshTokenService: RefreshTokenService,
     private val userRepository: UserRepository,
 ) {
-    fun processEmail(email: String): Session =
-        findOrCreateUser(email).let { user ->
-            when (val linkToken = magicLinkTokenService.upsertToken(user)) {
-                TokenStatus.Existing -> { /* No-op. */ }
+    fun processLogin(email: String) {
+        val user = findOrCreateUser(email)
+        when (val linkToken = magicLinkTokenService.upsertToken(user)) {
+            TokenStatus.Existing -> { /* No-op. */ }
 
-                is TokenStatus.New -> {
-                    emailService.sendAuthEmail(user.email, linkToken.token)
-                }
+            is TokenStatus.New -> {
+                emailService.sendAuthEmail(user.email, linkToken.token)
             }
-            Data() // TODO - I don't like this.
         }
+    }
 
     private fun findOrCreateUser(email: String): User = userRepository.findByEmail(email) ?: createNewUser(email)
 
@@ -40,7 +38,7 @@ class UserService(
 
     private fun issueSession(user: User?): Session =
         user?.let {
-            Data(
+            Session.Data(
                 accessToken = jwtService.generateAccessToken(it),
                 refreshToken = jwtRefreshTokenService.createOrRotateRefreshToken(it),
             )

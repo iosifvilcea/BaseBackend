@@ -38,48 +38,46 @@ class UserServiceTest {
         every { emailService.sendAuthEmail(any(), any()) } just runs
     }
 
-    // --- processEmail ---
+    // --- processLogin ---
 
     @Test
-    fun `processEmail returns Success when token is new and sends auth email`() {
+    fun `processLogin sends auth email when token is new`() {
         every { userRepository.findByEmail(user.email) } returns user
         every { magicLinkTokenService.upsertToken(user) } returns TokenStatus.New("rawtoken")
 
-        val result = service.processEmail(user.email)
+        service.processLogin(user.email)
 
-        assertTrue(result is Session.Data)
         verify(exactly = 1) { emailService.sendAuthEmail(user.email, "rawtoken") }
     }
 
     @Test
-    fun `processEmail returns Success when token exists and does not send email`() {
+    fun `processLogin does not send email when token already exists`() {
         every { userRepository.findByEmail(user.email) } returns user
         every { magicLinkTokenService.upsertToken(user) } returns TokenStatus.Existing
 
-        val result = service.processEmail(user.email)
+        service.processLogin(user.email)
 
-        assertTrue(result is Session.Data)
         verify(exactly = 0) { emailService.sendAuthEmail(any(), any()) }
     }
 
     @Test
-    fun `processEmail creates a new user when email is not found`() {
+    fun `processLogin creates a new user when email is not found`() {
         val newUser = User(id = 2L, email = "new@example.com")
         every { userRepository.findByEmail(newUser.email) } returns null
         every { userRepository.save(any()) } returns newUser
         every { magicLinkTokenService.upsertToken(newUser) } returns TokenStatus.Existing
 
-        service.processEmail(newUser.email)
+        service.processLogin(newUser.email)
 
         verify(exactly = 1) { userRepository.save(any()) }
     }
 
     @Test
-    fun `processEmail reuses existing user when email is found`() {
+    fun `processLogin reuses existing user when email is found`() {
         every { userRepository.findByEmail(user.email) } returns user
         every { magicLinkTokenService.upsertToken(user) } returns TokenStatus.Existing
 
-        service.processEmail(user.email)
+        service.processLogin(user.email)
 
         verify(exactly = 0) { userRepository.save(any()) }
     }

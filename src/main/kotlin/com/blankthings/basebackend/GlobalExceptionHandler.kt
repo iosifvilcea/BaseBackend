@@ -1,5 +1,6 @@
 package com.blankthings.basebackend
 
+import com.blankthings.basebackend.email.EmailDeliveryException
 import com.blankthings.basebackend.profile.ProfileNotFoundException
 import com.blankthings.basebackend.user.UserNotFoundException
 import org.slf4j.LoggerFactory
@@ -19,6 +20,10 @@ class GlobalExceptionHandler {
     @ExceptionHandler(ProfileNotFoundException::class)
     fun handleProfileNotFoundException(ex: ProfileNotFoundException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Profile not found")
+
+    @ExceptionHandler(EmailDeliveryException::class)
+    fun handleEmailDeliveryException(ex: EmailDeliveryException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, "Failed to send login email. Please try again.")
 
     @ExceptionHandler(Exception::class)
     fun handleGeneralException(ex: Exception): ProblemDetail {

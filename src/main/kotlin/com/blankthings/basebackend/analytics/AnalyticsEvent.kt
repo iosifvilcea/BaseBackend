@@ -15,6 +15,7 @@ enum class AnalyticsEvent {
     AUTH_FAILED,
 
     EMAIL_SENT,
+    EMAIL_FAILED,
 
     LOGOUT_SUCCESSFUL,
     LOGOUT_FAILED,
