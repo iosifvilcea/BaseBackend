@@ -14,12 +14,14 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
 @WebMvcTest(UserController::class)
+@TestPropertySource(properties = ["app.url=http://localhost"])
 class UserControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -75,7 +77,7 @@ class UserControllerTest {
     // --- GET /api/auth?token=... ---
 
     @Test
-    fun `GET authenticate returns 200 and sets cookies when token is valid`() {
+    fun `GET authenticate returns 302 with cookies and redirects when token is valid`() {
         given(userService.authenticate("validtoken")).willReturn(Session.Data("access", "refresh"))
         stubAuthCookies()
 
@@ -83,8 +85,9 @@ class UserControllerTest {
             .get("/api/auth") {
                 param("token", "validtoken")
             }.andExpect {
-                status { isOk() }
+                status { isFound() }
                 header { exists(HttpHeaders.SET_COOKIE) }
+                header { string(HttpHeaders.LOCATION, "http://localhost") }
             }
     }
 

@@ -6,6 +6,7 @@ import com.blankthings.basebackend.auth.REFRESH_TOKEN
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
 
 @RestController
 @RequestMapping(AUTH_URL_PATH)
 class UserController(
     private val userService: UserService,
     private val cookieManager: CookieManager,
+    @Value("\${app.url}") private val appUrl: String,
 ) {
     @PostMapping
     fun login(
@@ -34,18 +37,32 @@ class UserController(
     @GetMapping
     fun authenticate(
         @RequestParam token: String,
-    ): ResponseEntity<AuthResponse> = buildAuthResponse(userService.authenticate(token))
+    ): ResponseEntity<Void> =
+        when (val result = userService.authenticate(token)) {
+            Session.None -> {
+                ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+
+            is Session.Data -> {
+                ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .location(URI.create(appUrl))
+                    .header(HttpHeaders.SET_COOKIE, cookieManager.accessCookie(result.accessToken).toString())
+                    .header(HttpHeaders.SET_COOKIE, cookieManager.refreshCookie(result.refreshToken).toString())
+                    .build()
+            }
+        }
 
     @PostMapping("/refresh")
     fun refresh(
         @CookieValue(REFRESH_TOKEN, required = false) rawRefreshToken: String?,
-    ): ResponseEntity<AuthResponse> =
+    ): ResponseEntity<Void> =
         when (rawRefreshToken) {
             null -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-            else -> buildAuthResponse(userService.refreshSession(rawRefreshToken))
+            else -> buildRefreshResponse(userService.refreshSession(rawRefreshToken))
         }
 
-    private fun buildAuthResponse(result: Session): ResponseEntity<AuthResponse> =
+    private fun buildRefreshResponse(result: Session): ResponseEntity<Void> =
         when (result) {
             Session.None -> {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -56,7 +73,7 @@ class UserController(
                     .ok()
                     .header(HttpHeaders.SET_COOKIE, cookieManager.accessCookie(result.accessToken).toString())
                     .header(HttpHeaders.SET_COOKIE, cookieManager.refreshCookie(result.refreshToken).toString())
-                    .body(AuthResponse)
+                    .build()
             }
         }
 }
@@ -73,6 +90,3 @@ data class LoginResponse(
         If you can't find the login link in your email, be sure to check your spam folder.
         """.trimIndent(),
 )
-
-// TODO - This should carry on? Go to HOME?
-object AuthResponse
