@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\(gradle|properties|\\\\.kt$\\)\")",
+      "Bash(python3 -m pip install pdfplumber)",
+      "Bash(find / -name \"pdftotext\")",
+      "Bash(find / -name \"gs\")",
+      "Bash(dpkg -l)",
+      "Bash(apt-get install *)",
+      "Read(//tmp/**)",
+      "Bash(find / -maxdepth 4 -name \"pdftotext\")",
+      "Read(//opt/**)",
+      "Bash(./gradlew spotlessApply *)",
+      "WebFetch(domain:mermaid.js.org)",
+      "Bash(./gradlew test *)",
+      "Read(//usr/lib/**)",
+      "Bash(export JAVA_HOME=$\\(find /usr/lib/jvm -maxdepth 1 -type d)",
+      "Bash(grep -v \"^/usr/lib/jvm$\")"
+    ]
+  }
+}
